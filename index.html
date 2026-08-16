@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FFF : Fast For Fight - HTML Mixed With COFF Engine</title>
+    <style>
+        /* --- STYLE CSS EMBARQUÉ --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; }
+        body, html { width: 100vw; height: 100vh; overflow: hidden; background: #08090d; font-family: 'Impact', sans-serif; color: #fff; }
+        
+        #game-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        
+        .launcher-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(8, 9, 13, 0.95); display: flex; justify-content: center; align-items: center; z-index: 100;
+            backdrop-filter: blur(10px); padding: 15px; overflow-y: auto;
+        }
+        .launcher-card {
+            background: #12131c; border: 3px solid #00f0ff; border-radius: 16px; padding: 25px; text-align: center; max-width: 480px; width: 100%;
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.4);
+        }
+        .launcher-title { color: #00f0ff; font-style: italic; font-size: 2.2rem; text-transform: uppercase; margin-bottom: 5px; text-shadow: 2px 2px #ff0055; }
+        .launcher-subtitle { color: #a0a0b0; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 0.85rem; margin-bottom: 20px; }
+
+        .form-group { text-align: left; margin-bottom: 12px; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .form-group label { color: #00f0ff; font-weight: bold; font-size: 0.75rem; display: block; margin-bottom: 4px; text-transform: uppercase; }
+        .form-group select, .form-group input {
+            width: 100%; padding: 9px; background: #1a1c29; color: #fff; border: 1px solid #ff0055; border-radius: 6px; font-weight: bold;
+        }
+
+        .btn-start {
+            background: linear-gradient(45deg, #ff0055, #ff5500); color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; cursor: pointer;
+            font-family: 'Impact', sans-serif; font-size: 1.2rem; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.6); transition: transform 0.2s;
+        }
+        .btn-start:hover { transform: scale(1.02); }
+        .hidden { display: none !important; }
+    </style>
+    <!-- Moteur Three.js pour le rendu 3.5D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <div id="game-container"></div>
+
+    <!-- LAUNCHER INTERACTIF -->
+    <div id="home-launcher" class="launcher-overlay">
+        <div class="launcher-card">
+            <h1 class="launcher-title">FFF COFF STUDIO</h1>
+            <p class="launcher-subtitle">Labyrinthe Vertical (10 Étages) - PvP / PvE</p>
+            
+            <div class="form-group">
+                <label>Classe Opérationnelle :</label>
+                <select id="sel-class">
+                    <option value="soldat">Soldat (Équilibré)</option>
+                    <option value="fighter">Fighter (Corps à corps)</option>
+                    <option value="ingenieur">Ingénieur (Technologique)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Véhicule sans Moteur :</label>
+                <select id="sel-vehicle">
+                    <option value="skate">Skateboard (Inertie & Slides)</option>
+                    <option value="rollers">Rollers (Glisse continue)</option>
+                    <option value="velo">VTT (Freestyle & Figures : 360, flips...)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Émotion Emoji :</label>
+                <select id="sel-emotion">
+                    <option value="cool">Lunettes Cool</option>
+                    <option value="furieux">Regard Furieux</option>
+                    <option value="sourire">Confiant</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Couleur du Skin :</label>
+                <input type="color" id="sel-color" value="#ffcc00">
+            </div>
+
+            <button id="btn-start" class="btn-start">Lancer la Partie COFF</button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- STRUCTURE COFF MIXTE (HTML + CSS + JS + PY + JNODE) -->
+    <!-- ========================================== -->
+    <script type="text/coff" id="coff-fullstack-architecture">
+        <coff version="4.0" target="FFF_Mixed_Engine">
+
+            <!-- NŒUD 1 : FRONT-END INTERFACE -->
+            <co name="Frontend_UI_Layer">
+                <html template="launcher_ui">
+                    <![CDATA[
+                    <div id="home-launcher" class="launcher-overlay">
+                        <h1 class="launcher-title">FFF COFF STUDIO</h1>
+                    </div>
+                    ]]>
+                </html>
+                <css style="synthwave_theme">
+                    <![CDATA[
+                    body { background: #08090d; color: #fff; font-family: 'Impact', sans-serif; }
+                    .launcher-overlay { background: rgba(8, 9, 13, 0.95); backdrop-filter: blur(10px); }
+                    ]]>
+                </css>
+                <cosA1↔️B2> HTML_DOM_Binding ➡️ CSS_Style_Injection </cosA1↔️B2>
+            </co>
+
+            <!-- NŒUD 2 : LOGIQUE CLIENT (JS / 3.5D) -->
+            <co name="Client_Runtime_Engine">
+                <js script="three_renderer_tps">
+                    <![CDATA[
+                    // Moteur 3.5D géré par le client
+                    console.log("[COFF JS Engine] Initializing 3.5D TPS view...");
+                    ]]>
+                </js>
+                <cosB3↔️c4↔️E5> JS_Event_Listener 🔄 ThreeJS_Animate_Loop 🔄 Physics_Inertia </cosB3↔️c4↔️E5>
+            </co>
+
+            <!-- NŒUD 3 : GÉNÉRATEUR DE MAP (PYTHON) -->
+            <co name="Procedural_Map_Generator_Py">
+                <py script="labyrinth_generator">
+                    <![CDATA[
+                    import random
+                    def generate_vertical_maze(floors=10):
+                        # Labyrinthe à 10 étages avec 1 seul point d'accès par palier
+                        return {f: {"single_access_point": random.randint(1, 5)} for f in range(1, floors + 1)}
+                    ]]>
+                </py>
+                <cos➡️> Python_Maze_Data ➡️ JSON_Export_To_Client </cos➡️>
+            </co>
+
+            <!-- NŒUD 4 : BACKEND MULTIJOUEUR (NODE.JS) -->
+            <co name="Multiplayer_Backend_Node">
+                <jnode script="server_websocket">
+                    <![CDATA[
+                    const WebSocket = require('ws');
+                    const wss = new WebSocket.Server({ port: 8080 });
+                    wss.on('connection', ws => {
+                        ws.on('message', msg => wss.clients.forEach(c => c.send(msg)));
+                    });
+                    ]]>
+                </jnode>
+                <cosA1↔️B2> WebSocket_Sync ➡️ Player_Position_Broadcast </cosA1↔️B2>
+            </co>
+
+        </coff>
+    </script>
+
+    <!-- MOTEUR DE JEU JAVASCRIPT EXécutable -->
+    <script>
+        // Analyseur de la configuration COFF intégrée
+        const coffRaw = document.getElementById('coff-fullstack-architecture').textContent;
+        console.log("[COFF Parser] Architecture multi-langages chargée avec succès.");
+
+        // Initialisation de la scène 3.5D Three.js
+        const container = document.getElementById('game-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color('#08090d');
+        scene.fog = new THREE.Fog('#08090d', 15, 60);
+
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 30, 20);
+        scene.add(dirLight);
+
+        // Piste du Labyrinthe
+        const road = new THREE.Mesh(
+            new THREE.PlaneGeometry(20, 300),
+            new THREE.MeshStandardMaterial({ color: 0x12131c, roughness: 0.9, flatShading: true })
+        );
+        road.rotation.x = -Math.PI / 2;
+        scene.add(road);
+
+        const playerGroup = new THREE.Group();
+        scene.add(playerGroup);
+
+        function buildCharacterAndVehicle(combatClass, vehicleType, emotion, skinColor) {
+            while(playerGroup.children.length > 0) {
+                playerGroup.remove(playerGroup.children[0]);
+            }
+
+            const stickMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, flatShading: true });
+            
+            // Tête Emoji 3.5D
+            const head = new THREE.Mesh(
+                new THREE.SphereGeometry(0.7, 32, 32),
+                new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.1, flatShading: true })
+            );
+            head.position.y = 3.2;
+            playerGroup.add(head);
+
+            if (emotion === 'cool') {
+                const glasses = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.25, 0.3), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+                glasses.position.set(0, 3.2, 0.6);
+                playerGroup.add(glasses);
+            }
+
+            // Corps Stickman
+            const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.4, 8), stickMat);
+            spine.position.y = 2.1;
+            playerGroup.add(spine);
+
+            const armGeo = new THREE.CylinderGeometry(0.05, 0.05, 1.1, 8);
+            const armL = new THREE.Mesh(armGeo, stickMat); armL.rotation.z = Math.PI / 4; armL.position.set(-0.4, 2.4, 0);
+            const armR = new THREE.Mesh(armGeo, stickMat); armR.rotation.z = -Math.PI / 4; armR.position.set(0.4, 2.4, 0);
+            playerGroup.add(armL, armR);
+
+            const legL = new THREE.Mesh(armGeo, stickMat); legL.rotation.z = -Math.PI / 6; legL.position.set(-0.25, 1.2, 0);
+            const legR = new THREE.Mesh(armGeo, stickMat); legR.rotation.z = Math.PI / 6; legR.position.set(0.25, 1.2, 0);
+            playerGroup.add(legL, legR);
+
+            // Véhicule
+            const vehicleGroup = new THREE.Group();
+            if (vehicleType === 'skate') {
+                const board = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.1, 2.6), new THREE.MeshStandardMaterial({ color: 0xff0055 }));
+                board.position.y = 0.4;
+                vehicleGroup.add(board);
+            } else if (vehicleType === 'rollers') {
+                const rollerL = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.3, 0.9), new THREE.MeshStandardMaterial({ color: 0xffe600 }));
+                rollerL.position.set(-0.25, 0.2, 0);
+                const rollerR = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.3, 0.9), new THREE.MeshStandardMaterial({ color: 0xffe600 }));
+                rollerR.position.set(0.25, 0.2, 0);
+                vehicleGroup.add(rollerL, rollerR);
+            } else {
+                const frame = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.7, 2.2), new THREE.MeshStandardMaterial({ color: 0x00f0ff }));
+                frame.position.y = 0.9;
+                vehicleGroup.add(frame);
+            }
+            playerGroup.add(vehicleGroup);
+        }
+
+        document.getElementById('btn-start').addEventListener('click', () => {
+            const combatClass = document.getElementById('sel-class').value;
+            const vehicleType = document.getElementById('sel-vehicle').value;
+            const emotion = document.getElementById('sel-emotion').value;
+            const skinColor = document.getElementById('sel-color').value;
+
+            buildCharacterAndVehicle(combatClass, vehicleType, emotion, skinColor);
+            document.getElementById('home-launcher').classList.add('hidden');
+        });
+
+        buildCharacterAndVehicle('soldat', 'skate', 'cool', '#ffcc00');
+
+        function animate() {
+            requestAnimationFrame(animate);
+            camera.position.set(playerGroup.position.x, playerGroup.position.y + 3.2, playerGroup.position.z + 6.5);
+            camera.lookAt(playerGroup.position.x, playerGroup.position.y + 1.5, playerGroup.position.z);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
