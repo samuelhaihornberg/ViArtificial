@@ -6,7 +6,7 @@
 <!-- ↕️ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ViA - Mobile LocalEdge</title>
+<title>ViA - Auth Mobile Edge</title>
 <style>
     :root {
         --primary: #6366f1;
@@ -27,8 +27,8 @@
         position: relative;
     }
 
-    /* Écran de Connexion Mobile Sécurisé par PIN */
-    #UI_LoginOverlay {
+    /* Écrans d'Authentification (Inscription / Connexion) */
+    .auth-overlay {
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(15, 23, 42, 0.98);
@@ -39,7 +39,7 @@
         z-index: 100;
         padding: 20px;
     }
-    .login-card {
+    .auth-card {
         background: rgba(30, 41, 59, 0.95);
         padding: 25px;
         border-radius: 20px;
@@ -51,8 +51,8 @@
         gap: 12px;
         box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
-    .login-card h2 { text-align: center; color: #fff; font-size: 1.3rem; margin: 0; }
-    .login-input {
+    .auth-card h2 { text-align: center; color: #fff; font-size: 1.3rem; margin: 0; }
+    .auth-input {
         padding: 12px;
         background: rgba(255,255,255,0.05);
         border: 1px solid rgba(255,255,255,0.1);
@@ -61,7 +61,7 @@
         outline: none;
         font-size: 0.95rem;
     }
-    .login-btn {
+    .auth-btn {
         background: var(--primary);
         color: white;
         border: none;
@@ -70,6 +70,14 @@
         font-weight: bold;
         cursor: pointer;
     }
+    .auth-switch {
+        text-align: center;
+        font-size: 0.85rem;
+        color: #94a3b8;
+        cursor: pointer;
+        margin-top: 5px;
+    }
+    .auth-switch span { color: var(--secondary); text-decoration: underline; }
 
     .bg-shape {
         position: absolute;
@@ -194,13 +202,27 @@
 <body>
 <!-- ↕️ -->
 
-    <!-- Écran de Connexion Mobile (PIN 5 à 13 chiffres) -->
-    <div id="UI_LoginOverlay">
-        <div class="login-card">
-            <h2>ViA - Mobile Edge</h2>
-            <input type="password" id="loginPin" class="login-input" placeholder="Entrer le Code PIN (5-13 chiffres)" maxlength="13">
-            <button class="login-btn" onclick="validateMobileLogin()">Déverrouiller ⚡</button>
+    <!-- Écran de Connexion -->
+    <div id="UI_LoginOverlay" class="auth-overlay">
+        <div class="auth-card">
+            <h2>Connexion ViA</h2>
+            <input type="text" id="loginUser" class="auth-input" placeholder="Nom d'utilisateur">
+            <input type="password" id="loginPin" class="auth-input" placeholder="Code PIN (5-13 chiffres)" maxlength="13">
+            <button class="auth-btn" onclick="handleLogin()">Se connecter ⚡</button>
             <div id="loginError" style="color: #f87171; font-size: 0.8rem; text-align: center;"></div>
+            <div class="auth-switch" onclick="switchToRegister()">Pas de compte ? <span>S'inscrire</span></div>
+        </div>
+    </div>
+
+    <!-- Écran d'Inscription (Caché par défaut) -->
+    <div id="UI_RegisterOverlay" class="auth-overlay" style="display: none;">
+        <div class="auth-card">
+            <h2>Inscription ViA</h2>
+            <input type="text" id="regUser" class="auth-input" placeholder="Choisir un nom d'utilisateur">
+            <input type="password" id="regPin" class="auth-input" placeholder="Créer un Code PIN (5-13 chiffres)" maxlength="13">
+            <button class="auth-btn" onclick="handleRegister()">Créer le compte 🚀</button>
+            <div id="regError" style="color: #f87171; font-size: 0.8rem; text-align: center;"></div>
+            <div class="auth-switch" onclick="switchToLogin()">Déjà un compte ? <span>Se connecter</span></div>
         </div>
     </div>
 
@@ -210,17 +232,20 @@
     <div id="UI_App" style="display: none;">
         <div id="UI_Header">
             <div class="via-logo">V<span class="robot-i">i<span class="robot-head"></span></span>A</div>
-            <button class="action-id action-btn" onclick="toggleVoiceSpeech()" id="ttsToggleBtn">🔊</button>
+            <div style="display: flex; gap: 6px;">
+                <button class="action-btn" onclick="toggleVoiceSpeech()" id="ttsToggleBtn" title="Voix">🔊</button>
+                <button class="action-btn" onclick="handleLogout()" title="Déconnexion">🚪</button>
+            </div>
         </div>
         <div id="UI_Chat">
             <div class="msg-bubble via-msg">
-                Mode mobile actif. Pose ta question ou soumets ton projet : je génère l'analyse sémantique complète directement depuis ton navigateur. 🚀
+                Session sécurisée active. Pose ta question ou soumets ton projet : je génère l'analyse sémantique complète (500-1266 mots). 🚀
             </div>
         </div>
         <div id="UI_Controls">
-            <button class="action-btn" id="micBtn" onclick="toggleDictation()">🎤</button>
+            <button class="action-btn" id="micBtn" onclick="toggleDictation()" title="Dictée vocale">🎤</button>
             <input type="text" id="UI_Inp" placeholder="Message ou dictée..." onkeypress="checkEnter(event)">
-            <button class="action-btn" style="background: var(--primary);" onclick="triggerAction()">⚡</button>
+            <button class="action-btn" style="background: var(--primary);" onclick="triggerAction()" title="Envoyer">⚡</button>
         </div>
     </div>
 
@@ -229,17 +254,63 @@
     let isTTSEnabled = true;
     let recognition = null;
 
-    function validateMobileLogin() {
-        const pin = document.getElementById('loginPin').value.trim();
-        const errorDiv = document.getElementById('loginError');
+    // Basculer vers l'écran d'inscription
+    function switchToRegister() {
+        document.getElementById('UI_LoginOverlay').style.display = 'none';
+        document.getElementById('UI_RegisterOverlay').style.display = 'flex';
+    }
 
+    // Basculer vers l'écran de connexion
+    function switchToLogin() {
+        document.getElementById('UI_RegisterOverlay').style.display = 'none';
+        document.getElementById('UI_LoginOverlay').style.display = 'flex';
+    }
+
+    // Enregistrement d'un nouvel utilisateur en local
+    function handleRegister() {
+        const user = document.getElementById('regUser').value.trim();
+        const pin = document.getElementById('regPin').value.trim();
+        const errorDiv = document.getElementById('regError');
+
+        if (!user) {
+            errorDiv.textContent = "Le nom d'utilisateur est requis.";
+            return;
+        }
         if (pin.length < 5 || pin.length > 13 || isNaN(pin)) {
             errorDiv.textContent = "Le PIN doit contenir entre 5 et 13 chiffres.";
             return;
         }
 
+        // Sauvegarde dans localStorage
+        localStorage.setItem("ViA_User_" + user, pin);
+        alert("Compte créé avec succès ! Connecte-toi.");
+        switchToLogin();
+    }
+
+    // Connexion de l'utilisateur
+    function handleLogin() {
+        const user = document.getElementById('loginUser').value.trim();
+        const pin = document.getElementById('loginPin').value.trim();
+        const errorDiv = document.getElementById('loginError');
+
+        const savedPin = localStorage.getItem("ViA_User_" + user);
+
+        if (!savedPin || savedPin !== pin) {
+            errorDiv.textContent = "Identifiant ou Code PIN incorrect.";
+            return;
+        }
+
+        // Connexion réussie
         document.getElementById('UI_LoginOverlay').style.display = 'none';
         document.getElementById('UI_App').style.display = 'flex';
+    }
+
+    // Déconnexion
+    function handleLogout() {
+        document.getElementById('UI_App').style.display = 'none';
+        document.getElementById('UI_LoginOverlay').style.display = 'flex';
+        document.getElementById('loginUser').value = '';
+        document.getElementById('loginPin').value = '';
     }
 
     function toggleDictation() {
@@ -255,7 +326,7 @@
         micBtn.classList.add('mic-active');
 
         recognition.onresult = function(event) {
-            UI_Inp.value = event.results[0][0].transcript; // Relecture possible avant envoi
+            UI_Inp.value = event.results[0][0].transcript;
             micBtn.classList.remove('mic-active');
         };
         recognition.onerror = () => micBtn.classList.remove('mic-active');
@@ -347,14 +418,15 @@
 
 <!--propriety style="display:none;"-->
 <!-- ↕️ -->
-<!--coMobileEdgeEngine➡️Active-->
+<!--coAuthRegisterLogin➡️LocalStorage-->
+<!--coPinSecurity➡️5to13Digits-->
 <!--/propriety-->
 <!-- ↕️ -->
 
 <!--value style="display:none;"-->
 <!-- ↕️ -->
-<!--coUI_Pin✅↔️SessionUnlock-->
-<!--coVoiceMic✅↔️InputText-->
+<!--coRegister✅↔️SaveUser-->
+<!--coLogin✅↔️UnlockApp-->
 <!--/value-->
 <!-- ↕️ -->
 
@@ -362,4 +434,5 @@
 <!-- ↕️ -->
 </html>
 <!-- ↕️ -->
+
 
