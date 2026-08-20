@@ -1,92 +1,79 @@
-<!DOCTYPE html>
-	↕️coDocType
+<<!DOCTYPE html>
 <html lang="fr">
-	↕️coHtml
 <head>
-	↕️coHead
-<meta charset="UTF-8">
-	↕️coMetaCharset
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	↕️coMetaView
-<title>ViA - Coach & Planificatrice</title>
-	↕️coTitle
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViA - Coach & Planificatrice</title>
 </head>
-	↕️coHead_End
 <style>
-	↕️coStyle
-	/* --- CSS : Le Design de l'Interface --- */
-	body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #F3F4F6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-	#UI_App { width: 100%; max-width: 450px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; height: 80vh; }
-	#UI_Chat { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #FAFAFA; }
-	#UI_Controls { display: flex; padding: 15px; background: white; border-top: 1px solid #E5E7EB; }
-	#UI_Inp { flex: 1; padding: 12px; border: 1px solid #D1D5DB; border-radius: 20px; outline: none; }
-	#UI_Btn { background: #4F46E5; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 10px; cursor: pointer; font-weight: bold; }
+    /* --- CSS : Le Design Standard --- */
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #F3F4F6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    #UI_App { width: 100%; max-width: 450px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; height: 80vh; }
+    #UI_Chat { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #FAFAFA; }
+    #UI_Controls { display: flex; padding: 15px; background: white; border-top: 1px solid #E5E7EB; }
+    #UI_Inp { flex: 1; padding: 12px; border: 1px solid #D1D5DB; border-radius: 20px; outline: none; }
+    #UI_Btn { background: #4F46E5; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 10px; cursor: pointer; font-weight: bold; }
 </style>
-	↕️coStyle_End
 <body>
-	↕️coBody
-<div id="UI_App">
-	↕️coAppCont
-<div id="UI_Chat"></div>
-	↕️coChatCont
-<div id="UI_Controls">
-	↕️coControls
-<input type="text" id="UI_Inp" placeholder="Une tâche à planifier ?">
-	↕️coInpCont
-<button id="UI_Btn">Go</button>
-	↕️coBtnCont
-</div>
-	↕️coControls_End
-</div>
-	↕️coAppCont_End
+
+    <div id="UI_App">
+        <div id="UI_Chat"></div>
+        <div id="UI_Controls">
+            <input type="text" id="UI_Inp" placeholder="Une tâche à planifier ?">
+            <button id="UI_Btn">Go</button>
+        </div>
+    </div>
+
 <script>
-	↕️coScript
-	// --- JAVASCRIPT : Les Muscles ---
-	const API_Url = "http://localhost:3000/api/chat";
-	const UI_Chat = document.getElementById("UI_Chat");
-	const UI_Inp = document.getElementById("UI_Inp");
-	const UI_Btn = document.getElementById("UI_Btn");
+    // --- JAVASCRIPT : Logique d'appel standard ---
+    const UI_Chat = document.getElementById("UI_Chat");
+    const UI_Inp = document.getElementById("UI_Inp");
+    const UI_Btn = document.getElementById("UI_Btn");
 
-	// La fonction concrète qui discute avec ton backend
-	async function callViA(text) {
-		UI_Chat.innerHTML += `<div style="align-self: flex-end; background: #4F46E5; color: white; padding: 10px; border-radius: 10px;">${text}</div>`;
-		UI_Chat.innerHTML += `<div id="Load" style="align-self: flex-start; color: gray; font-size: 0.9em;">ViA organise ça...</div>`;
-		
-		try {
-			const res = await fetch(API_Url, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ prompt: "En tant que ViA, assistante de productivité : " + text })
-			});
-			const data = await res.json();
-			document.getElementById("Load").remove();
-			UI_Chat.innerHTML += `<div style="align-self: flex-start; background: #E5E7EB; padding: 10px; border-radius: 10px;">${data.reponse}</div>`;
-		} catch (e) {
-			document.getElementById("Load").remove();
-			UI_Chat.innerHTML += `<div style="color: red;">Erreur de synchronisation 🛑</div>`;
-		}
-	}
+    async function callViA(text, url) {
+        UI_Chat.innerHTML += `<div style="align-self: flex-end; background: #4F46E5; color: white; padding: 10px; border-radius: 10px;">${text}</div>`;
+        UI_Chat.innerHTML += `<div id="Load" style="align-self: flex-start; color: gray; font-size: 0.9em;">ViA organise ça...</div>`;
+        
+        try {
+            const res = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: "En tant que ViA, assistante de productivité : " + text })
+            });
+            const data = await res.json();
+            document.getElementById("Load").remove();
+            UI_Chat.innerHTML += `<div style="align-self: flex-start; background: #E5E7EB; padding: 10px; border-radius: 10px;">${data.reponse}</div>`;
+        } catch (e) {
+            document.getElementById("Load").remove();
+            UI_Chat.innerHTML += `<div style="color: red;">Erreur de synchronisation 🛑</div>`;
+        }
+    }
 
-<Value>
-/// --- ROUTAGE COFF : Le Chef d'Orchestre ---
+<propriety>
+/// --- DÉCLARATION DES PROPRIÉTÉS COFF ---
+/// On définit l'URL de l'API comme une propriété immuable
+<coAPI_Url➡️"http://localhost:3000/api/chat">
+</co>
+</propriety>
 
-/// 1. Écoute du bouton : Si UI_Btn est cliqué (✅), on capte la valeur de UI_Inp dans Txt_U
+<value>
+/// --- ROUTAGE DES ACTIONS COFF ---
+/// 1. Clic sur le bouton (✅) capte l'entrée utilisateur
 <coUI_Btn✅↔️UI_Inp➡️Txt_U>
 
-/// 2. Déclenchement JS : Le texte Txt_U est dirigé directement vers la fonction callViA()
-<coTxt_U➡️callViA()>
+/// 2. On déclenche la fonction avec le texte et la propriété API_Url
+<coTxt_U↔️API_Url➡️callViA()>
 
-/// 3. Nettoyage : Une fois la donnée partie, on vide (❌) le champ de saisie
+/// 3. On nettoie le champ de saisie
 <coTxt_U➡️❌UI_Inp>
 
 /// Fermetures
 </co>
 </co>
 </co>
-</Value>
-	↕️coScript_End
+</value>
+
 </script>
-	↕️coBody_End
 </body>
-	↕️coHtml_End
 </html>
+
