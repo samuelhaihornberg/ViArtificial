@@ -1,0 +1,46 @@
+<html>
+	↕️coDoc
+<style>
+	↕️coTheme
+<body>
+	↕️coView
+<script>
+	↕️coLogic
+<Value>
+
+/// --- 1. DÉCLARATION SÉCURISÉE ---
+/// API_Url : "http://localhost:3000/api/chat" (Notre pont vers le Backend)
+/// UI_Inp : Champ de texte utilisateur
+/// UI_Btn : Bouton "Envoyer"
+/// Txt_U : La question posée
+/// Txt_IA : La réponse renvoyée par le serveur
+
+/// --- 2. ROUTAGE VISUEL COFF ---
+
+/// A. L'utilisateur clique -> On capture le texte
+<coUI_Btn✅↔️UI_Inp➡️Txt_U>
+
+/// B. On envoie le texte au Backend (pas à l'API Google directement)
+<coTxt_U➡️API_Url➡️🔄>
+
+/// C. Succès du Backend -> On affiche la réponse de Gemini dans la vue
+<co🔄✅➡️Txt_IA➡️coView>
+
+/// D. Erreur du Backend -> Message de secours
+<co🔄❌➡️"Connexion perdue avec le serveur"➡️coView>
+
+/// --- 3. FERMETURES DE LA LOGIQUE ---
+</co>
+</co>
+</co>
+</co>
+
+</Value>
+	↕️coLogic_End
+</script>
+	↕️coView_End
+</body>
+	↕️coTheme_End
+</style>
+	↕️coDoc_End
+</html>
