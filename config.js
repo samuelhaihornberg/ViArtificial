@@ -1,0 +1,3 @@
+const CONFIG = {
+    GEMINI_API_KEY: "TA_VRAIE_CLE_API_ICI"
+};
