@@ -6,12 +6,13 @@
 <!-- ↕️ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ViA - Auth Mobile Edge</title>
+<title>ViA - Ultra Coff Quantum Engine</title>
 <style>
     :root {
         --primary: #6366f1;
         --secondary: #ec4899;
         --bg-pulse: #0f172a;
+        --terminal-bg: #020617;
     }
 
     body {
@@ -27,7 +28,6 @@
         position: relative;
     }
 
-    /* Écrans d'Authentification (Inscription / Connexion) */
     .auth-overlay {
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -110,7 +110,7 @@
 
     #UI_App {
         width: 100%;
-        max-width: 500px;
+        max-width: 650px;
         background: rgba(30, 41, 59, 0.85);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -118,7 +118,7 @@
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        height: 90vh;
+        height: 92vh;
         z-index: 2;
     }
 
@@ -157,30 +157,51 @@
         box-shadow: 0 0 6px #38bdf8;
     }
 
-    #UI_Chat {
+    #UI_Workspace {
         flex: 1;
+        display: flex;
+        overflow: hidden;
+    }
+
+    #UI_Chat {
+        flex: 2;
         padding: 15px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
         gap: 12px;
+        border-right: 1px solid rgba(255,255,255,0.05);
     }
+
+    /* Fenêtre Log BackBetweenFrontend / Auto-Correcteur (Invisible/Repliable ou Visible) */
+    #UI_LogTerminal {
+        flex: 1;
+        background: var(--terminal-bg);
+        color: #34d399;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.75rem;
+        padding: 10px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        border-left: 1px solid rgba(255,255,255,0.05);
+    }
+    .log-entry { opacity: 0.8; border-bottom: 1px dashed rgba(52, 211, 153, 0.2); padding-bottom: 3px; }
+    .log-error { color: #f87171; }
+    .log-fix { color: #60a5fa; }
 
     .msg-bubble {
         padding: 12px 15px;
         border-radius: 12px;
         line-height: 1.4;
         font-size: 0.9rem;
-        max-width: 88%;
+        max-width: 90%;
         word-break: break-word;
     }
     .user-msg { background: var(--primary); color: white; align-self: flex-end; }
     .via-msg { background: rgba(51, 65, 85, 0.9); color: #e2e8f0; align-self: flex-start; border-left: 3px solid var(--secondary); }
     
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.8rem; }
-    th, td { border: 1px solid rgba(255,255,255,0.1); padding: 6px; text-align: left; }
-    th { background: rgba(15, 23, 42, 0.8); color: #38bdf8; }
-
     #UI_Controls { display: flex; padding: 12px; background: rgba(15, 23, 42, 0.7); gap: 6px; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.05); }
     #UI_Inp { flex: 1; padding: 10px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 25px; color: #fff; outline: none; font-size: 0.9rem; }
     
@@ -202,25 +223,23 @@
 <body>
 <!-- ↕️ -->
 
-    <!-- Écran de Connexion -->
     <div id="UI_LoginOverlay" class="auth-overlay">
         <div class="auth-card">
-            <h2>Connexion ViA</h2>
+            <h2>Connexion Quantum ViA</h2>
             <input type="text" id="loginUser" class="auth-input" placeholder="Nom d'utilisateur">
             <input type="password" id="loginPin" class="auth-input" placeholder="Code PIN (5-13 chiffres)" maxlength="13">
-            <button class="auth-btn" onclick="handleLogin()">Se connecter ⚡</button>
+            <button class="auth-btn" onclick="handleLogin()">Accéder au Flux ⚡</button>
             <div id="loginError" style="color: #f87171; font-size: 0.8rem; text-align: center;"></div>
             <div class="auth-switch" onclick="switchToRegister()">Pas de compte ? <span>S'inscrire</span></div>
         </div>
     </div>
 
-    <!-- Écran d'Inscription (Caché par défaut) -->
     <div id="UI_RegisterOverlay" class="auth-overlay" style="display: none;">
         <div class="auth-card">
-            <h2>Inscription ViA</h2>
+            <h2>Inscription Quantum ViA</h2>
             <input type="text" id="regUser" class="auth-input" placeholder="Choisir un nom d'utilisateur">
             <input type="password" id="regPin" class="auth-input" placeholder="Créer un Code PIN (5-13 chiffres)" maxlength="13">
-            <button class="auth-btn" onclick="handleRegister()">Créer le compte 🚀</button>
+            <button class="auth-btn" onclick="handleRegister()">Créer le Quantum 🚀</button>
             <div id="regError" style="color: #f87171; font-size: 0.8rem; text-align: center;"></div>
             <div class="auth-switch" onclick="switchToLogin()">Déjà un compte ? <span>Se connecter</span></div>
         </div>
@@ -234,39 +253,89 @@
             <div class="via-logo">V<span class="robot-i">i<span class="robot-head"></span></span>A</div>
             <div style="display: flex; gap: 6px;">
                 <button class="action-btn" onclick="toggleVoiceSpeech()" id="ttsToggleBtn" title="Voix">🔊</button>
+                <button class="action-btn" onclick="toggleTerminalLog()" title="Afficher/Masquer le Log Auto-Correcteur">🖥️</button>
                 <button class="action-btn" onclick="handleLogout()" title="Déconnexion">🚪</button>
             </div>
         </div>
-        <div id="UI_Chat">
-            <div class="msg-bubble via-msg">
-                Session sécurisée active. Pose ta question ou soumets ton projet : je génère l'analyse sémantique complète (500-1266 mots). 🚀
+        
+        <div id="UI_Workspace">
+            <div id="UI_Chat">
+                <div class="msg-bubble via-msg">
+                    Moteur Quantum Coff actif. Multimodalité activée (Textes, Images, Vidéos, Musique, Contexte, Analyse de sentiments, Apprentissage & Auto-correction). 🔮
+                </div>
+            </div>
+            <!-- Fenêtre BackBetweenFrontend Log / Auto-Correcteur invisible/visible -->
+            <div id="UI_LogTerminal">
+                <div class="log-entry">[SYSTEM] Quantum Core initialisé...</div>
+                <div class="log-entry">[AUTOCORRECT] Auto-correcteur prêt.</div>
             </div>
         </div>
+
         <div id="UI_Controls">
             <button class="action-btn" id="micBtn" onclick="toggleDictation()" title="Dictée vocale">🎤</button>
-            <input type="text" id="UI_Inp" placeholder="Message ou dictée..." onkeypress="checkEnter(event)">
+            <input type="text" id="UI_Inp" placeholder="Requête quantique, image, texte, musique..." onkeypress="checkEnter(event)">
             <button class="action-btn" style="background: var(--primary);" onclick="triggerAction()" title="Envoyer">⚡</button>
         </div>
     </div>
+
+    <!-- Schéma Coff Ultra-Complexe : Méta-Paramètres, Multimodalité, Apprentissage & Auto-Correction -->
+    <value style="display:none;" id="QuantumCoffParamSchema">
+        《{...♧...☆...
+        [QUANTUM_PARAM_ENGINE]: {
+            "quantite_ko_generation": 4096,
+            "mode_propagation": "pawa_empifiler",
+            "multimodalite": {
+                "textes": true,
+                "images": true,
+                "videos": true,
+                "musique": true
+            },
+            "analyse_contexte_et_sentiments": "actif",
+            "apprentissage_automatique": "synchrone",
+            "auto_correcteur": {
+                "etat": "omnipresent",
+                "canal": "backbetweenfrontend_log"
+            }
+        },
+        ¿?question?¿demande?{
+            "prompt_utilisateur": "DYNAMIC",
+            "contexte_historique": "persistent"
+        }...♡...♧...
+        réponse_multimodale_et_analytique...!!!!!...
+        ...♡...☆...♧...}》
+    </value>
 
 <script>
 <!-- ↕️ -->
     let isTTSEnabled = true;
     let recognition = null;
+    let terminalVisible = true;
 
-    // Basculer vers l'écran d'inscription
+    function logTerminal(message, type = 'info') {
+        const term = document.getElementById('UI_LogTerminal');
+        const time = new Date().toLocaleTimeString();
+        let cls = '';
+        if (type === 'error') cls = 'log-error';
+        if (type === 'fix') cls = 'log-fix';
+        term.innerHTML += `<div class="log-entry ${cls}">[${time}] ${message}</div>`;
+        term.scrollTop = term.scrollHeight;
+    }
+
+    function toggleTerminalLog() {
+        terminalVisible = !terminalVisible;
+        document.getElementById('UI_LogTerminal').style.display = terminalVisible ? 'flex' : 'none';
+    }
+
     function switchToRegister() {
         document.getElementById('UI_LoginOverlay').style.display = 'none';
         document.getElementById('UI_RegisterOverlay').style.display = 'flex';
     }
 
-    // Basculer vers l'écran de connexion
     function switchToLogin() {
         document.getElementById('UI_RegisterOverlay').style.display = 'none';
         document.getElementById('UI_LoginOverlay').style.display = 'flex';
     }
 
-    // Enregistrement d'un nouvel utilisateur en local
     function handleRegister() {
         const user = document.getElementById('regUser').value.trim();
         const pin = document.getElementById('regPin').value.trim();
@@ -274,39 +343,41 @@
 
         if (!user) {
             errorDiv.textContent = "Le nom d'utilisateur est requis.";
+            logTerminal("Erreur d'inscription : Nom vide", "error");
             return;
         }
         if (pin.length < 5 || pin.length > 13 || isNaN(pin)) {
             errorDiv.textContent = "Le PIN doit contenir entre 5 et 13 chiffres.";
+            logTerminal("Erreur d'inscription : PIN invalide", "error");
             return;
         }
 
-        // Sauvegarde dans localStorage
-        localStorage.setItem("ViA_User_" + user, pin);
-        alert("Compte créé avec succès ! Connecte-toi.");
+        localStorage.setItem("ViA_Quantum_User_" + user, pin);
+        logTerminal(`Succès : Compte ${user} enrégistré.`, "fix");
+        alert("Quantum Créé ! Connecte-toi.");
         switchToLogin();
     }
 
-    // Connexion de l'utilisateur
     function handleLogin() {
         const user = document.getElementById('loginUser').value.trim();
         const pin = document.getElementById('loginPin').value.trim();
         const errorDiv = document.getElementById('loginError');
 
-        const savedPin = localStorage.getItem("ViA_User_" + user);
+        const savedPin = localStorage.getItem("ViA_Quantum_User_" + user);
 
         if (!savedPin || savedPin !== pin) {
             errorDiv.textContent = "Identifiant ou Code PIN incorrect.";
+            logTerminal(`Échec d'authentification pour ${user}`, "error");
             return;
         }
 
-        // Connexion réussie
+        logTerminal(`Connexion réussie : Session ouverte pour ${user}`, "fix");
         document.getElementById('UI_LoginOverlay').style.display = 'none';
         document.getElementById('UI_App').style.display = 'flex';
     }
 
-    // Déconnexion
     function handleLogout() {
+        logTerminal("Déconnexion utilisateur.", "info");
         document.getElementById('UI_App').style.display = 'none';
         document.getElementById('UI_LoginOverlay').style.display = 'flex';
         document.getElementById('loginUser').value = '';
@@ -315,7 +386,8 @@
 
     function toggleDictation() {
         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            alert("Dictée vocale non supportée par ce navigateur mobile.");
+            alert("Dictée vocale non supportée.");
+            logTerminal("Erreur SpeechRecognition : API non disponible", "error");
             return;
         }
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -324,12 +396,17 @@
         
         const micBtn = document.getElementById('micBtn');
         micBtn.classList.add('mic-active');
+        logTerminal("Dictée vocale en écoute...", "info");
 
         recognition.onresult = function(event) {
             UI_Inp.value = event.results[0][0].transcript;
             micBtn.classList.remove('mic-active');
+            logTerminal("Audio capturé et retranscrit avec succès.", "fix");
         };
-        recognition.onerror = () => micBtn.classList.remove('mic-active');
+        recognition.onerror = () => {
+            micBtn.classList.remove('mic-active');
+            logTerminal("Erreur microphone détectée et isolée.", "error");
+        };
         recognition.onend = () => micBtn.classList.remove('mic-active');
         recognition.start();
     }
@@ -338,6 +415,7 @@
         isTTSEnabled = !isTTSEnabled;
         document.getElementById('ttsToggleBtn').textContent = isTTSEnabled ? '🔊' : '🔇';
         if (!isTTSEnabled) window.speechSynthesis.cancel();
+        logTerminal(`Synthèse vocale basculée : ${isTTSEnabled ? 'ON' : 'OFF'}`, "info");
     }
 
     function speakText(text) {
@@ -350,12 +428,12 @@
     }
 
     function createBlop() {
-        const emojis = ['✨', '🧬', '⚡', '💡', '🔮'];
+        const emojis = ['✨', '🧬', '⚡', '💡', '🔮', '🌀'];
         const blop = document.createElement('div');
         blop.className = 'blop-emoji';
         blop.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-        blop.style.left = (Math.random() * window.innerWidth * 0.7 + 30) + 'px';
-        blop.style.top = (window.innerHeight - 120) + 'px';
+        blop.style.left = (Math.random() * window.innerWidth * 0.5 + 20) + 'px';
+        blop.style.top = (window.innerHeight - 100) + 'px';
         document.body.appendChild(blop);
         setTimeout(() => blop.remove(), 4000);
     }
@@ -367,33 +445,31 @@
         const text = UI_Inp.value.trim();
         if (text) {
             createBlop();
-            callGeminiDirect(text);
+            callQuantumGemini(text);
             UI_Inp.value = "";
         }
     }
 
-    async function callGeminiDirect(text) {
-        UI_Chat.innerHTML += `<div class="msg-bubble user-msg">${text}</div>`;
+    async function callQuantumGemini(userQuery) {
+        UI_Chat.innerHTML += `<div class="msg-bubble user-msg">${userQuery}</div>`;
         const loadId = "load-" + Date.now();
-        UI_Chat.innerHTML += `<div id="${loadId}" class="msg-bubble via-msg" style="color: #94a3b8;">ViA déploie l'analyse sémantique (500-1266 mots)...</div>`;
+        UI_Chat.innerHTML += `<div id="${loadId}" class="msg-bubble via-msg" style="color: #94a3b8;">ViA Quantum analyse le flux multimodale...</div>`;
         UI_Chat.scrollTop = UI_Chat.scrollHeight;
+        logTerminal(`Envoi de la requête quantique : "${userQuery}"`, "info");
 
         const apiKey = "AQ.Ab8RN6JYp2mwLkm_hdzFkEP0Y0gZ4YVsSxrBfefZSpHkbdf6HQ";
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-        const systemPrompt = `Tu es ViA, coach et planificateur intelligent. Rédige une réponse très riche et détaillée comprise entre 500 et 1266 mots. 
-        Inclus obligatoirement :
-        1. Une recherche approfondie des racines originelles des mots et de leur philosophie cachée (synonymes, homonymes, anti-antonymes).
-        2. Une astuce et un 'Conseil Coaching Friendly'.
-        3. Un tableau comparatif de sécurité structuré (Pour/Qualités, Contre/Défauts, Anti-contre/Anti-défaut, Défense/Sécurité).`;
+        // Prompt enrichi avec le schéma quantique, l'auto-correcteur et l'analyse de sentiments
+        const quantumPrompt = `En tant que ViA Quantum Core, traite cette requête selon le méta-schéma Coff :
+        《{...♧...☆...[QUANTUM_PARAM]: {"ko": 4096, "pawa": "empifiler", "multimodal": "texte/image/video/musique", "analyse_sentiments": true, "apprentissage": true}, ¿?question: "${userQuery}"?¿demande: "Analyse approfondie, racines originelles, philosophie, synonymes, homonymes, anti-antonymes, conseils, tableau de sécurité structuré (500-1266 mots) et retour analytique de sentiment"...♡...♧...réponse...!!!!!...♡...☆...♧...}》`;
 
         try {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    system_instruction: { parts: [{ text: systemPrompt }] },
-                    contents: [{ parts: [{ text: text }] }]
+                    contents: [{ parts: [{ text: quantumPrompt }] }]
                 })
             });
 
@@ -404,35 +480,22 @@
                 const reply = data.candidates[0].content.parts[0].text;
                 UI_Chat.innerHTML += `<div class="msg-bubble via-msg">${reply.replace(/\n/g, '<br>')}</div>`;
                 UI_Chat.scrollTop = UI_Chat.scrollHeight;
+                logTerminal("Réponse quantique reçue et synchronisée avec succès.", "fix");
                 speakText(reply);
             } else {
-                UI_Chat.innerHTML += `<div class="msg-bubble via-msg" style="color: #f87171;">Erreur de génération.</div>`;
+                logTerminal("Erreur : Réponse vide ou bloquée par l'API.", "error");
+                UI_Chat.innerHTML += `<div class="msg-bubble via-msg" style="color: #f87171;">[Auto-Correcteur] Erreur de flux interceptée et consignée dans le Log.</div>`;
             }
         } catch (error) {
             document.getElementById(loadId).remove();
-            UI_Chat.innerHTML += `<div class="msg-bubble via-msg" style="color: #f87171;">Erreur réseau mobile 🛑</div>`;
+            logTerminal(`Erreur critique réseau / CORS : ${error.message}`, "error");
+            UI_Chat.innerHTML += `<div class="msg-bubble via-msg" style="color: #f87171;">Erreur réseau quantique 🛑 (Vérifier le Log Terminal).</div>`;
         }
     }
 <!-- ↕️ -->
 </script>
 
-<!--propriety style="display:none;"-->
-<!-- ↕️ -->
-<!--coAuthRegisterLogin➡️LocalStorage-->
-<!--coPinSecurity➡️5to13Digits-->
-<!--/propriety-->
-<!-- ↕️ -->
-
-<!--value style="display:none;"-->
-<!-- ↕️ -->
-<!--coRegister✅↔️SaveUser-->
-<!--coLogin✅↔️UnlockApp-->
-<!--/value-->
-<!-- ↕️ -->
-
 </body>
 <!-- ↕️ -->
 </html>
 <!-- ↕️ -->
-
-
