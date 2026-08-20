@@ -1,3 +1,4 @@
-config.js
-.env
-node_modules/
+const CONFIG = {
+    GEMINI_API_KEY: "AQ.Ab8RN6JnD5vC9oKObjEg0BxT8vALrSSsIeF6loGQTio45uMb3Q"
+};
+
