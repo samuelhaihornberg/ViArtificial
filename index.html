@@ -6,16 +6,16 @@
 <!-- ↕️ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ViA - Ultimate Coff Quantum Engine</title>
-<!-- Importation sécurisée de ta configuration secrète (config.js) -->
+<title>ViA - Quantum Coff & Morphing Géométrique</title>
+<!-- Appel crucial du fichier config.js pour sécuriser ta clé -->
 <script src="config.js">
 </script>
 <style>
     :root {
         --primary: #6366f1;
         --secondary: #ec4899;
-        --bg-pulse: #0f172a;
-        --terminal-bg: #020617;
+        --bg-pulse: #020617;
+        --terminal-bg: #090d16;
     }
 
     body {
@@ -31,10 +31,65 @@
         position: relative;
     }
 
+    /* --- FORMES GÉOMÉTRIQUES LUMINEUSES & MORPHING DYNAMIQUE --- */
+    .geo-morph-container {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        overflow: hidden;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .geometric-shape {
+        position: absolute;
+        filter: blur(40px);
+        opacity: 0.35;
+        mix-blend-mode: screen;
+        animation: morphAndPulse 8s infinite alternate ease-in-out;
+    }
+
+    /* Forme 1 : Cercle de base vers Polygone complexe */
+    .shape-alpha {
+        width: 320px; height: 320px;
+        background: radial-gradient(circle, var(--primary), #3b82f6);
+        top: 15%; left: 10%;
+        border-radius: 50%;
+        animation-name: morphAlpha;
+        animation-duration: 10s;
+        animation-iteration-count: infinite;
+    }
+
+    /* Forme 2 : Carré lumineux vers Étoile/Matrice complexe */
+    .shape-beta {
+        width: 380px; height: 380px;
+        background: radial-gradient(circle, var(--secondary), #8b5cf6);
+        bottom: 10%; right: 10%;
+        border-radius: 20%;
+        animation-name: morphBeta;
+        animation-duration: 12s;
+        animation-iteration-count: infinite;
+        animation-delay: 2s;
+    }
+
+    @keyframes morphAlpha {
+        0% { transform: scale(1) rotate(0deg); border-radius: 50%; background: #6366f1; }
+        33% { transform: scale(1.25) rotate(120deg) skew(10deg); border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; background: #06b6d4; }
+        66% { transform: scale(0.9) rotate(240deg) scaleY(1.2); border-radius: 50% 20% 50% 20% / 40% 60% 40% 60%; background: #ec4899; }
+        100% { transform: scale(1.1) rotate(360deg); border-radius: 50%; background: #6366f1; }
+    }
+
+    @keyframes morphBeta {
+        0% { transform: scale(0.9) rotate(0deg); border-radius: 20%; background: #ec4899; }
+        40% { transform: scale(1.3) rotate(-140deg) skew(-15deg); border-radius: 40% 50% 30% 60% / 50% 30% 60% 40%; background: #3b82f6; }
+        80% { transform: scale(1.1) rotate(-280deg); border-radius: 10% 90% 20% 80% / 80% 20% 90% 10%; background: #10b981; }
+        100% { transform: scale(0.9) rotate(-360deg); border-radius: 20%; background: #ec4899; }
+    }
+
+    /* --- INTERFACE & AUTH --- */
     .auth-overlay {
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(15, 23, 42, 0.98);
+        background: rgba(2, 6, 23, 0.92);
         backdrop-filter: blur(15px);
         display: flex;
         justify-content: center;
@@ -43,7 +98,7 @@
         padding: 20px;
     }
     .auth-card {
-        background: rgba(30, 41, 59, 0.95);
+        background: rgba(15, 23, 42, 0.9);
         padding: 25px;
         border-radius: 20px;
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -52,7 +107,7 @@
         display: flex;
         flex-direction: column;
         gap: 12px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.7);
     }
     .auth-card h2 { text-align: center; color: #fff; font-size: 1.3rem; margin: 0; }
     .auth-input {
@@ -72,7 +127,9 @@
         border-radius: 10px;
         font-weight: bold;
         cursor: pointer;
+        transition: background 0.2s;
     }
+    .auth-btn:hover { background: #4f46e5; }
     .auth-switch {
         text-align: center;
         font-size: 0.85rem;
@@ -81,22 +138,6 @@
         margin-top: 5px;
     }
     .auth-switch span { color: var(--secondary); text-decoration: underline; }
-
-    .bg-shape {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(50px);
-        opacity: 0.3;
-        animation: pulseAnimation 3s infinite alternate ease-in-out;
-        z-index: -1;
-    }
-    .shape-1 { width: 250px; height: 250px; background: var(--primary); top: 10%; left: 10%; }
-    .shape-2 { width: 300px; height: 300px; background: var(--secondary); bottom: 10%; right: 10%; }
-
-    @keyframes pulseAnimation {
-        0% { transform: scale(1); opacity: 0.2; }
-        100% { transform: scale(1.2); opacity: 0.5; }
-    }
 
     .blop-emoji {
         position: absolute;
@@ -114,8 +155,8 @@
     #UI_App {
         width: 100%;
         max-width: 650px;
-        background: rgba(30, 41, 59, 0.85);
-        backdrop-filter: blur(10px);
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 16px;
         display: flex;
@@ -123,11 +164,12 @@
         overflow: hidden;
         height: 92vh;
         z-index: 2;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.5);
     }
 
     #UI_Header {
         padding: 15px;
-        background: rgba(15, 23, 42, 0.7);
+        background: rgba(2, 6, 23, 0.7);
         text-align: center;
         display: flex;
         justify-content: space-between;
@@ -202,9 +244,9 @@
         word-break: break-word;
     }
     .user-msg { background: var(--primary); color: white; align-self: flex-end; }
-    .via-msg { background: rgba(51, 65, 85, 0.9); color: #e2e8f0; align-self: flex-start; border-left: 3px solid var(--secondary); }
+    .via-msg { background: rgba(30, 41, 59, 0.9); color: #e2e8f0; align-self: flex-start; border-left: 3px solid var(--secondary); }
     
-    #UI_Controls { display: flex; padding: 12px; background: rgba(15, 23, 42, 0.7); gap: 6px; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+    #UI_Controls { display: flex; padding: 12px; background: rgba(2, 6, 23, 0.7); gap: 6px; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.05); }
     #UI_Inp { flex: 1; padding: 10px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 25px; color: #fff; outline: none; font-size: 0.9rem; }
     
     .action-btn {
@@ -216,7 +258,9 @@
         cursor: pointer;
         display: flex; justify-content: center; align-items: center;
         font-size: 0.9rem;
+        transition: transform 0.2s, background 0.2s;
     }
+    .action-btn:hover { transform: scale(1.1); background: var(--primary); }
     .mic-active { background: #ef4444 !important; }
 </style>
 <!-- ↕️ -->
@@ -225,6 +269,13 @@
 <body>
 <!-- ↕️ -->
 
+    <!-- Formes Géométriques Pulsatives & Morphing Lumineux -->
+    <div class="geo-morph-container">
+        <div class="geometric-shape shape-alpha"></div>
+        <div class="geometric-shape shape-beta"></div>
+    </div>
+
+    <!-- Écran de Connexion -->
     <div id="UI_LoginOverlay" class="auth-overlay">
         <div class="auth-card">
             <h2>Connexion Quantum ViA</h2>
@@ -236,6 +287,7 @@
         </div>
     </div>
 
+    <!-- Écran d'Inscription -->
     <div id="UI_RegisterOverlay" class="auth-overlay" style="display: none;">
         <div class="auth-card">
             <h2>Inscription Quantum ViA</h2>
@@ -247,9 +299,7 @@
         </div>
     </div>
 
-    <div class="bg-shape shape-1"></div>
-    <div class="bg-shape shape-2"></div>
-
+    <!-- Application Principale -->
     <div id="UI_App" style="display: none;">
         <div id="UI_Header">
             <div class="via-logo">V<span class="robot-i">i<span class="robot-head"></span></span>A</div>
@@ -263,12 +313,12 @@
         <div id="UI_Workspace">
             <div id="UI_Chat">
                 <div class="msg-bubble via-msg">
-                    Moteur Quantum Coff sécurisé actif. Soumets ta requête : analyse sémantique, racines originelles et tableaux de sécurité. 🔮
+                    Moteur Quantum Coff actif. Le morphing géométrique réagit au flux. Soumets ton projet ! 🔮
                 </div>
             </div>
             <div id="UI_LogTerminal">
-                <div class="log-entry">[SYSTEM] Quantum Core initialisé...</div>
-                <div class="log-entry">[AUTOCORRECT] Sécurité API activée via config.js.</div>
+                <div class="log-entry">[SYSTEM] Quantum Core & Morphing initialisés...</div>
+                <div class="log-entry">[AUTOCORRECT] Sécurité API active via config.js.</div>
             </div>
         </div>
 
@@ -279,7 +329,7 @@
         </div>
     </div>
 
-    <!-- Schéma Coff Ultra-Complexe -->
+    <!-- Schéma Coff Quantum -->
     <value style="display:none;" id="QuantumCoffParamSchema">
         《{...♧...☆...
         [QUANTUM_PARAM_ENGINE]: {
@@ -439,7 +489,6 @@
         UI_Chat.scrollTop = UI_Chat.scrollHeight;
         logTerminal(`Requête envoyée : "${userQuery}"`, "info");
 
-        // Utilisation de la clé sécurisée depuis le fichier externe config.js
         const apiKey = (typeof CONFIG !== 'undefined' && CONFIG.GEMINI_API_KEY) ? CONFIG.GEMINI_API_KEY : "";
         if (!apiKey) {
             logTerminal("Erreur critique : config.js introuvable ou clé manquante !", "error");
