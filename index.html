@@ -1,0 +1,62 @@
+<html>
+<style>
+<body>
+<script>
+<Valeurs et propriétés>
+
+/// --- 1. DÉCLARATION DES ALPHANUMÉRIQUES (Les "Si ?" / États & Composants) ---
+/// UI_App : Conteneur responsive global de la PWA
+/// UI_Chat : Fenêtre de discussion
+/// UI_Inp : Champ de saisie utilisateur
+/// UI_Btn : Bouton d'envoi
+/// API_Key : "AQ.Ab8RN6JYp2mwLkm_hdzFkEP0Y0gZ4YVsSxrBfefZSpHkbdf6HQ"
+/// API_Sys : "Tu es ViA... Finis par 💡 Conseil Coaching Friendly"
+/// Txt_U : Texte saisi par l'utilisateur (True si non-vide)
+/// Load : Indicateur "ViA réfléchit..."
+/// Txt_IA : Réponse générée par Gemini
+
+/// --- 2. CONNEXIONS ET ROUTAGE (Les Émojis - Le "Un pour tout") ---
+
+/// A. Initialisation de l'interface et du cerveau de l'IA
+<coUI_App↔️UI_Chat↔️UI_Inp↔️UI_Btn>
+<coAPI_Key➡️API_Sys>
+
+/// B. Écoute de l'action utilisateur (Clic sur le bouton ou touche Entrée)
+/// Si UI_Btn est cliqué (✅) et que UI_Inp n'est pas vide -> on extrait Txt_U
+<coUI_Btn✅↔️UI_Inp➡️Txt_U>
+
+/// C. Affichage immédiat dans le chat et vidage du champ
+<coTxt_U➡️UI_Chat>
+<coTxt_U➡️❌UI_Inp> 
+
+/// D. Lancement du chargement visuel dans le chat
+<coTxt_U➡️Load➡️UI_Chat>
+
+/// E. Appel API vers Gemini (Transmission du texte + Système)
+<coTxt_U↔️API_Sys➡️🔄> 
+
+/// F. Retour de l'API (Succès) -> Création du message IA et arrêt du chargement
+<co🔄✅➡️Txt_IA>
+<coTxt_IA➡️❌Load>
+<coTxt_IA➡️UI_Chat>
+
+/// G. Retour de l'API (Erreur / False) -> Message d'erreur
+<co🔄❌➡️"Erreur API AQ..."➡️UI_Chat>
+
+/// --- 3. FERMETURES DE L'ARCHITECTURE COFF ---
+</co>
+</co>
+</co>
+</co>
+</co>
+</co>
+</co>
+</co>
+</co>
+</co>
+
+</Valeurs et propriétés>
+</script>
+</body>
+</style>
+</html>
