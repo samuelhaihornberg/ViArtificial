@@ -1,33 +1,34 @@
-<html>
-↕️
-<style> 
-↕️
+<!DOCTYPE html>
+	↕️coDocType
+<html lang="fr">
+	↕️coHtml
+<head>
+	↕️coHead
+<meta charset="UTF-8">
+	↕️coMetaCharset
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	↕️coMetaView
+<title>ViA - Coach IA</title>
+	↕️coTitle
+</head>
+	↕️coHead_End
+<style>
+	↕️coStyle
 <body>
-↕️
+	↕️coBody
 <script>
-↕️
+	↕️coScript
 <Value>
 
-/// --- 1. DÉCLARATION SÉCURISÉE ---
-/// API_Url : "http://localhost:3000/api/chat" (Notre pont vers le Backend)
-/// UI_Inp : Champ de texte utilisateur
-/// UI_Btn : Bouton "Envoyer"
-/// Txt_U : La question posée
-/// Txt_IA : La réponse renvoyée par le serveur
+/// --- 1. DÉCLARATION ---
+/// API_Url : "http://localhost:3000/api/chat"
+/// UI_Inp, UI_Btn, Txt_U, Txt_IA...
 
 /// --- 2. ROUTAGE VISUEL COFF ---
-
-/// A. L'utilisateur clique -> On capture le texte
 <coUI_Btn✅↔️UI_Inp➡️Txt_U>
-
-/// B. On envoie le texte au Backend (pas à l'API Google directement)
 <coTxt_U➡️API_Url➡️🔄>
-
-/// C. Succès du Backend -> On affiche la réponse de Gemini dans la vue
-<co🔄✅➡️Txt_IA➡️coView>
-
-/// D. Erreur du Backend -> Message de secours
-<co🔄❌➡️"Connexion perdue avec le serveur"➡️coView>
+<co🔄✅➡️Txt_IA➡️coBody>
+<co🔄❌➡️"Erreur réseau..."➡️coBody>
 
 /// --- 3. FERMETURES DE LA LOGIQUE ---
 </co>
@@ -36,11 +37,12 @@
 </co>
 
 </Value>
-↕️
+	↕️coScript_End
 </script>
-↕️
+	↕️coBody_End
 </body>
-↕️
+	↕️coStyle_End
 </style>
-↕️
+	↕️coHtml_End
 </html>
+
