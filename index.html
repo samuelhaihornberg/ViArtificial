@@ -6,27 +6,181 @@
 	↕️
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ViA - Coach & Planificatrice</title>
-</head>
-	↕️
+<title>ViA - Coach Vivant & Sémantique</title>
 <style>
-	↕️
-	body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #F3F4F6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-	#UI_App { width: 100%; max-width: 450px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; height: 80vh; }
-	#UI_Chat { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #FAFAFA; }
-	#UI_Controls { display: flex; padding: 15px; background: white; border-top: 1px solid #E5E7EB; }
-	#UI_Inp { flex: 1; padding: 12px; border: 1px solid #D1D5DB; border-radius: 20px; outline: none; }
-	#UI_Btn { background: #4F46E5; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 10px; cursor: pointer; font-weight: bold; }
+    /* --- CSS : Design Vibrant & Pulsation --- */
+    :root {
+        --primary: #6366f1;
+        --secondary: #ec4899;
+        --bg-pulse: #0f172a;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-pulse);
+        color: #f8fafc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Fond animé géométrique vibrant */
+    .bg-shape {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.4;
+        animation: pulseAnimation 3s infinite alternate ease-in-out;
+        z-index: -1;
+    }
+    .shape-1 { width: 300px; height: 300px; background: var(--primary); top: 10%; left: 20%; }
+    .shape-2 { width: 400px; height: 400px; background: var(--secondary); bottom: 10%; right: 15%; animation-delay: 1.5s; }
+
+    @keyframes pulseAnimation {
+        0% { transform: scale(1); opacity: 0.3; }
+        100% { transform: scale(1.25); opacity: 0.6; }
+    }
+
+    /* Effet Blop Emoji Flottant */
+    .blop-emoji {
+        position: absolute;
+        font-size: 1.8rem;
+        animation: floatBlop 4s ease-out forwards;
+        pointer-events: none;
+        z-index: 10;
+    }
+    @keyframes floatBlop {
+        0% { transform: translateY(0) scale(0.5); opacity: 0; }
+        50% { opacity: 1; transform: translateY(-40px) scale(1.2); }
+        100% { transform: translateY(-80px) scale(1); opacity: 0; }
+    }
+
+    #UI_App {
+        width: 100%;
+        max-width: 600px;
+        background: rgba(30, 41, 59, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        height: 85vh;
+        z-index: 2;
+    }
+
+    /* Logo ViA avec Tête de Robot Vivante sur le 'i' */
+    #UI_Header {
+        padding: 20px;
+        background: rgba(15, 23, 42, 0.6);
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .via-logo {
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+    }
+    .robot-i {
+        position: relative;
+        display: inline-block;
+        margin: 0 2px;
+        color: var(--secondary);
+    }
+    .robot-head {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 10px;
+        background: #38bdf8;
+        border-radius: 4px;
+        box-shadow: 0 0 8px #38bdf8;
+        animation: robotPulse 2s infinite alternate;
+    }
+    .robot-head::after {
+        content: '';
+        position: absolute;
+        top: -3px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 3px;
+        background: #fff;
+    }
+    @keyframes robotPulse {
+        0% { box-shadow: 0 0 4px #38bdf8; background: #38bdf8; }
+        100% { box-shadow: 0 0 12px #ec4899; background: #ec4899; }
+    }
+
+    #UI_Chat {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .msg-bubble {
+        padding: 14px 18px;
+        border-radius: 14px;
+        line-height: 1.5;
+        font-size: 0.95rem;
+        max-width: 85%;
+    }
+    .user-msg { background: var(--primary); color: white; align-self: flex-end; }
+    .via-msg { background: rgba(51, 65, 85, 0.9); color: #e2e8f0; align-self: flex-start; border-left: 4px solid var(--secondary); }
+    
+    /* Tableaux de Sécurité & Comparatifs */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+    th, td { border: 1px solid rgba(255,255,255,0.1); padding: 8px; text-align: left; }
+    th { background: rgba(15, 23, 42, 0.8); color: #38bdf8; }
+
+    #UI_Controls { display: flex; padding: 15px; background: rgba(15, 23, 42, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.05); }
+    #UI_Inp { flex: 1; padding: 12px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; color: #fff; outline: none; }
+    #UI_Inp:focus { border-color: var(--primary); }
+    #UI_Btn { background: var(--primary); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 10px; cursor: pointer; font-weight: bold; transition: transform 0.2s; }
+    #UI_Btn:hover { transform: scale(1.05); }
+
+    .meta-semantic {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        border-top: 1px dashed rgba(255,255,255,0.1);
+        margin-top: 8px;
+        padding-top: 6px;
+    }
 </style>
-	↕️
+    ↕️
 <body>
 	↕️
 
+    <!-- Formes géométriques d'arrière-plan vibrantes -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
     <div id="UI_App">
-        <div id="UI_Chat"></div>
+        <div id="UI_Header">
+            <div class="via-logo">V<span class="robot-i">i<span class="robot-head"></span></span>A</div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Intelligence Vivante & Sémantique Active</div>
+        </div>
+        <div id="UI_Chat">
+            <div class="msg-bubble via-msg">
+                Salutations ! Je suis ViA, ton extension vivante. Tape un mot ou un projet : je décortique ses racines originelles, sa philosophie cachée, et structure ta défense stratégique. 🚀
+            </div>
+        </div>
         <div id="UI_Controls">
-            <input type="text" id="UI_Inp" placeholder="Une tâche à planifier ?" onkeypress="checkEnter(event)">
-            <button id="UI_Btn" onclick="triggerAction()">Go</button>
+            <input type="text" id="UI_Inp" placeholder="Soumets un concept à décortiquer..." onkeypress="checkEnter(event)">
+            <button id="UI_Btn" onclick="triggerAction()">⚡</button>
         </div>
     </div>
 
@@ -36,16 +190,36 @@
     const UI_Chat = document.getElementById("UI_Chat");
     const UI_Inp = document.getElementById("UI_Inp");
 
+    // Générateur d'effet "Blop" animé en transition
+    function createBlop(x, y) {
+        const emojis = ['✨', '🧬', '⚡', '👁️', '💡', '🌱', '🔮'];
+        const blop = document.createElement('div');
+        blop.className = 'blop-emoji';
+        blop.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        blop.style.left = (x || Math.random() * window.innerWidth * 0.7 + 50) + 'px';
+        blop.style.top = (y || window.innerHeight - 150) + 'px';
+        document.body.appendChild(blop);
+        setTimeout(() => blop.remove(), 4000);
+    }
+
+    // Déclenchement automatique de blops visuels toutes les 3 secondes en pulsation
+    setInterval(() => createBlop(), 3000);
+
     function checkEnter(event) { if (event.key === "Enter") triggerAction(); }
+    
     function triggerAction() {
         const text = UI_Inp.value.trim();
-        if (text) { callViA(text); UI_Inp.value = ""; }
+        if (text) {
+            createBlop();
+            callViA(text);
+            UI_Inp.value = "";
+        }
     }
 
     async function callViA(text) {
-        UI_Chat.innerHTML += `<div style="align-self: flex-end; background: #4F46E5; color: white; padding: 10px; border-radius: 10px;">${text}</div>`;
+        UI_Chat.innerHTML += `<div class="msg-bubble user-msg">${text}</div>`;
         const loadId = "load-" + Date.now();
-        UI_Chat.innerHTML += `<div id="${loadId}" style="align-self: flex-start; color: gray; font-size: 0.9em;">ViA réfléchit...</div>`;
+        UI_Chat.innerHTML += `<div id="${loadId}" class="msg-bubble via-msg" style="color: #94a3b8;">ViA scanne les racines et analyse les couches sémantiques...</div>`;
         UI_Chat.scrollTop = UI_Chat.scrollHeight;
         
         try {
@@ -56,11 +230,13 @@
             });
             const data = await res.json();
             document.getElementById(loadId).remove();
-            UI_Chat.innerHTML += `<div style="align-self: flex-start; background: #E5E7EB; padding: 10px; border-radius: 10px; line-height: 1.4;">${data.reponse.replace(/\n/g, '<br>')}</div>`;
+            
+            // Injection de la réponse structurée (Astuce, Conseil, Tableau de Sécurité & Sémantique cachée)
+            UI_Chat.innerHTML += `<div class="msg-bubble via-msg">${data.reponse}</div>`;
             UI_Chat.scrollTop = UI_Chat.scrollHeight;
         } catch (e) {
             document.getElementById(loadId).remove();
-            UI_Chat.innerHTML += `<div style="color: red;">Erreur de synchronisation (Serveur Node.js éteint) 🛑</div>`;
+            UI_Chat.innerHTML += `<div class="msg-bubble via-msg" style="color: #f87171;">Erreur de synchronisation sémantique avec le serveur Node.js 🛑</div>`;
         }
     }
 </script>
@@ -69,6 +245,7 @@
 <propriety style="display:none;">
 	↕️
 <coAPI_Url➡️"http://localhost:3000/api/chat">
+<coSanitizationEngine➡️Active>
 </propriety>
 	↕️
 
@@ -83,5 +260,7 @@
 </body>
 	↕️
 </html>
+	↕️
+
 	
 
