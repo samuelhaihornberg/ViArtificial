@@ -6,7 +6,7 @@
 <!-- ↕️ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ViA - LocalEdge Node & Sémantique</title>
+<title>ViA - Mobile LocalEdge</title>
 <style>
     :root {
         --primary: #6366f1;
@@ -27,31 +27,33 @@
         position: relative;
     }
 
+    /* Écran de Connexion Mobile Sécurisé par PIN */
     #UI_LoginOverlay {
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(15, 23, 42, 0.95);
+        background: rgba(15, 23, 42, 0.98);
         backdrop-filter: blur(15px);
         display: flex;
         justify-content: center;
         align-items: center;
         z-index: 100;
+        padding: 20px;
     }
     .login-card {
-        background: rgba(30, 41, 59, 0.9);
-        padding: 30px;
+        background: rgba(30, 41, 59, 0.95);
+        padding: 25px;
         border-radius: 20px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         width: 100%;
-        max-width: 380px;
+        max-width: 340px;
         display: flex;
         flex-direction: column;
-        gap: 15px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        gap: 12px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
-    .login-card h2 { text-align: center; color: #fff; margin-bottom: 5px; }
+    .login-card h2 { text-align: center; color: #fff; font-size: 1.3rem; margin: 0; }
     .login-input {
-        padding: 12px 15px;
+        padding: 12px;
         background: rgba(255,255,255,0.05);
         border: 1px solid rgba(255,255,255,0.1);
         border-radius: 10px;
@@ -67,67 +69,64 @@
         border-radius: 10px;
         font-weight: bold;
         cursor: pointer;
-        transition: background 0.2s;
     }
-    .login-btn:hover { background: #4f46e5; }
 
     .bg-shape {
         position: absolute;
         border-radius: 50%;
-        filter: blur(60px);
-        opacity: 0.4;
+        filter: blur(50px);
+        opacity: 0.3;
         animation: pulseAnimation 3s infinite alternate ease-in-out;
         z-index: -1;
     }
-    .shape-1 { width: 300px; height: 300px; background: var(--primary); top: 10%; left: 20%; }
-    .shape-2 { width: 400px; height: 400px; background: var(--secondary); bottom: 10%; right: 15%; animation-delay: 1.5s; }
+    .shape-1 { width: 250px; height: 250px; background: var(--primary); top: 10%; left: 10%; }
+    .shape-2 { width: 300px; height: 300px; background: var(--secondary); bottom: 10%; right: 10%; }
 
     @keyframes pulseAnimation {
-        0% { transform: scale(1); opacity: 0.3; }
-        100% { transform: scale(1.25); opacity: 0.6; }
+        0% { transform: scale(1); opacity: 0.2; }
+        100% { transform: scale(1.2); opacity: 0.5; }
     }
 
     .blop-emoji {
         position: absolute;
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         animation: floatBlop 4s ease-out forwards;
         pointer-events: none;
         z-index: 10;
     }
     @keyframes floatBlop {
         0% { transform: translateY(0) scale(0.5); opacity: 0; }
-        50% { opacity: 1; transform: translateY(-40px) scale(1.2); }
-        100% { transform: translateY(-80px) scale(1); opacity: 0; }
+        50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+        100% { transform: translateY(-60px) scale(1); opacity: 0; }
     }
 
     #UI_App {
         width: 100%;
-        max-width: 600px;
+        max-width: 500px;
         background: rgba(30, 41, 59, 0.85);
-        backdrop-filter: blur(12px);
+        backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        border-radius: 16px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        height: 85vh;
+        height: 90vh;
         z-index: 2;
     }
 
     #UI_Header {
-        padding: 20px;
-        background: rgba(15, 23, 42, 0.6);
+        padding: 15px;
+        background: rgba(15, 23, 42, 0.7);
         text-align: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         display: flex;
         justify-content: space-between;
         align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
     .via-logo {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         font-weight: 800;
-        letter-spacing: 2px;
+        letter-spacing: 1px;
         color: #fff;
         display: inline-flex;
         align-items: center;
@@ -140,60 +139,54 @@
     }
     .robot-head {
         position: absolute;
-        top: -14px;
+        top: -12px;
         left: 50%;
         transform: translateX(-50%);
-        width: 12px;
-        height: 10px;
+        width: 10px;
+        height: 8px;
         background: #38bdf8;
-        border-radius: 4px;
-        box-shadow: 0 0 8px #38bdf8;
-        animation: robotPulse 2s infinite alternate;
-    }
-    @keyframes robotPulse {
-        0% { box-shadow: 0 0 4px #38bdf8; background: #38bdf8; }
-        100% { box-shadow: 0 0 12px #ec4899; background: #ec4899; }
+        border-radius: 3px;
+        box-shadow: 0 0 6px #38bdf8;
     }
 
     #UI_Chat {
         flex: 1;
-        padding: 20px;
+        padding: 15px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 12px;
     }
 
     .msg-bubble {
-        padding: 14px 18px;
-        border-radius: 14px;
-        line-height: 1.5;
-        font-size: 0.95rem;
-        max-width: 85%;
+        padding: 12px 15px;
+        border-radius: 12px;
+        line-height: 1.4;
+        font-size: 0.9rem;
+        max-width: 88%;
+        word-break: break-word;
     }
     .user-msg { background: var(--primary); color: white; align-self: flex-end; }
-    .via-msg { background: rgba(51, 65, 85, 0.9); color: #e2e8f0; align-self: flex-start; border-left: 4px solid var(--secondary); }
+    .via-msg { background: rgba(51, 65, 85, 0.9); color: #e2e8f0; align-self: flex-start; border-left: 3px solid var(--secondary); }
     
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-    th, td { border: 1px solid rgba(255,255,255,0.1); padding: 8px; text-align: left; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.8rem; }
+    th, td { border: 1px solid rgba(255,255,255,0.1); padding: 6px; text-align: left; }
     th { background: rgba(15, 23, 42, 0.8); color: #38bdf8; }
 
-    #UI_Controls { display: flex; padding: 15px; background: rgba(15, 23, 42, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.05); gap: 8px; align-items: center; }
-    #UI_Inp { flex: 1; padding: 12px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; color: #fff; outline: none; }
+    #UI_Controls { display: flex; padding: 12px; background: rgba(15, 23, 42, 0.7); gap: 6px; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+    #UI_Inp { flex: 1; padding: 10px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 25px; color: #fff; outline: none; font-size: 0.9rem; }
     
     .action-btn {
         background: rgba(255,255,255,0.1);
         color: white;
         border: none;
         border-radius: 50%;
-        width: 42px; height: 42px;
+        width: 38px; height: 38px;
         cursor: pointer;
         display: flex; justify-content: center; align-items: center;
-        transition: background 0.2s, transform 0.2s;
+        font-size: 0.9rem;
     }
-    .action-btn:hover { background: var(--primary); transform: scale(1.05); }
-    .mic-active { background: #ef4444 !important; animation: pulseMic 1.5s infinite; }
-    @keyframes pulseMic { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    .mic-active { background: #ef4444 !important; }
 </style>
 <!-- ↕️ -->
 </head>
@@ -201,15 +194,12 @@
 <body>
 <!-- ↕️ -->
 
-    <!-- Écran de Connexion Local / IP / PIN -->
+    <!-- Écran de Connexion Mobile (PIN 5 à 13 chiffres) -->
     <div id="UI_LoginOverlay">
         <div class="login-card">
-            <h2>ViA - LocalEdge Secure</h2>
-            <input type="text" id="loginIP" class="login-input" placeholder="Adresse IP du LocalBackend" value="127.0.0.1">
-            <input type="password" id="loginPwd" class="login-input" placeholder="Mot de passe utilisateur">
-            <input type="password" id="loginPwd2" class="login-input" placeholder="Mot de passe 2 (Optionnel)">
-            <input type="password" id="loginPin" class="login-input" placeholder="Code PIN (5 à 13 chiffres)" maxlength="13">
-            <button class="login-btn" onclick="validateLoginSession()">Démarrer LocalBackend ⚡</button>
+            <h2>ViA - Mobile Edge</h2>
+            <input type="password" id="loginPin" class="login-input" placeholder="Entrer le Code PIN (5-13 chiffres)" maxlength="13">
+            <button class="login-btn" onclick="validateMobileLogin()">Déverrouiller ⚡</button>
             <div id="loginError" style="color: #f87171; font-size: 0.8rem; text-align: center;"></div>
         </div>
     </div>
@@ -220,45 +210,33 @@
     <div id="UI_App" style="display: none;">
         <div id="UI_Header">
             <div class="via-logo">V<span class="robot-i">i<span class="robot-head"></span></span>A</div>
-            <button class="action-btn" onclick="toggleVoiceSpeech()" title="Voix de ViA" id="ttsToggleBtn">🔊</button>
+            <button class="action-id action-btn" onclick="toggleVoiceSpeech()" id="ttsToggleBtn">🔊</button>
         </div>
         <div id="UI_Chat">
             <div class="msg-bubble via-msg">
-                Connexion locale établie. Je suis ViA. Vos données de session restent isolées sur votre espace IP sécurisé. Soumettez votre requête sémantique. 🚀
+                Mode mobile actif. Pose ta question ou soumets ton projet : je génère l'analyse sémantique complète directement depuis ton navigateur. 🚀
             </div>
         </div>
         <div id="UI_Controls">
-            <button class="action-btn" id="micBtn" onclick="toggleDictation()" title="Dictée vocale">🎤</button>
-            <input type="text" id="UI_Inp" placeholder="Écris ou dicte ton concept..." onkeypress="checkEnter(event)">
-            <button class="action-btn" style="background: var(--primary);" onclick="triggerAction()" title="Envoyer">⚡</button>
+            <button class="action-btn" id="micBtn" onclick="toggleDictation()">🎤</button>
+            <input type="text" id="UI_Inp" placeholder="Message ou dictée..." onkeypress="checkEnter(event)">
+            <button class="action-btn" style="background: var(--primary);" onclick="triggerAction()">⚡</button>
         </div>
     </div>
 
 <script>
 <!-- ↕️ -->
-    // Clé et configuration stockées localement par l'utilisateur sans installation de serveur lourd
-    let userSessionConfig = { ip: "", pin: "" };
     let isTTSEnabled = true;
     let recognition = null;
 
-    function validateLoginSession() {
-        const ip = document.getElementById('loginIP').value.trim();
-        const pwd = document.getElementById('loginPwd').value.trim();
+    function validateMobileLogin() {
         const pin = document.getElementById('loginPin').value.trim();
         const errorDiv = document.getElementById('loginError');
 
-        if (!ip || !pwd) {
-            errorDiv.textContent = "L'adresse IP et le mot de passe sont obligatoires.";
-            return;
-        }
         if (pin.length < 5 || pin.length > 13 || isNaN(pin)) {
-            errorDiv.textContent = "Le Code PIN doit comporter entre 5 et 13 chiffres.";
+            errorDiv.textContent = "Le PIN doit contenir entre 5 et 13 chiffres.";
             return;
         }
-
-        // Sauvegarde de la session locale chiffrée en mémoire
-        userSessionConfig = { ip, pin };
-        localStorage.setItem("ViA_LocalSession", JSON.stringify(userSessionConfig));
 
         document.getElementById('UI_LoginOverlay').style.display = 'none';
         document.getElementById('UI_App').style.display = 'flex';
@@ -266,25 +244,22 @@
 
     function toggleDictation() {
         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            alert("La dictée vocale n'est pas supportée par votre navigateur.");
+            alert("Dictée vocale non supportée par ce navigateur mobile.");
             return;
         }
-
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
         recognition.lang = 'fr-FR';
-        recognition.interimResults = false;
-
+        
         const micBtn = document.getElementById('micBtn');
         micBtn.classList.add('mic-active');
 
         recognition.onresult = function(event) {
-            UI_Inp.value = event.results[0][0].transcript; // Relecture et modification possible
+            UI_Inp.value = event.results[0][0].transcript; // Relecture possible avant envoi
             micBtn.classList.remove('mic-active');
         };
         recognition.onerror = () => micBtn.classList.remove('mic-active');
         recognition.onend = () => micBtn.classList.remove('mic-active');
-
         recognition.start();
     }
 
@@ -303,17 +278,17 @@
         window.speechSynthesis.speak(utterance);
     }
 
-    function createBlop(x, y) {
-        const emojis = ['✨', '🧬', '⚡', '👁️', '💡', '🌱', '🔮'];
+    function createBlop() {
+        const emojis = ['✨', '🧬', '⚡', '💡', '🔮'];
         const blop = document.createElement('div');
         blop.className = 'blop-emoji';
         blop.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-        blop.style.left = (x || Math.random() * window.innerWidth * 0.7 + 50) + 'px';
-        blop.style.top = (y || window.innerHeight - 150) + 'px';
+        blop.style.left = (Math.random() * window.innerWidth * 0.7 + 30) + 'px';
+        blop.style.top = (window.innerHeight - 120) + 'px';
         document.body.appendChild(blop);
         setTimeout(() => blop.remove(), 4000);
     }
-    setInterval(() => createBlop(), 3000);
+    setInterval(() => createBlop(), 3500);
 
     function checkEnter(event) { if (event.key === "Enter") triggerAction(); }
     
@@ -321,24 +296,21 @@
         const text = UI_Inp.value.trim();
         if (text) {
             createBlop();
-            callViALocalBackend(text);
+            callGeminiDirect(text);
             UI_Inp.value = "";
         }
     }
 
-    // Appel direct sécurisé simulant un routage par IP locale avec l'API Gemini
-    async function callViALocalBackend(text) {
+    async function callGeminiDirect(text) {
         UI_Chat.innerHTML += `<div class="msg-bubble user-msg">${text}</div>`;
         const loadId = "load-" + Date.now();
-        UI_Chat.innerHTML += `<div id="${loadId}" class="msg-bubble via-msg" style="color: #94a3b8;">Traitement LocalEdge IP (${userSessionConfig.ip}) : Analyse sémantique en cours...</div>`;
+        UI_Chat.innerHTML += `<div id="${loadId}" class="msg-bubble via-msg" style="color: #94a3b8;">ViA déploie l'analyse sémantique (500-1266 mots)...</div>`;
         UI_Chat.scrollTop = UI_Chat.scrollHeight;
 
-        // Clé intégrée de manière sécurisée pour l'instance utilisateur
         const apiKey = "AQ.Ab8RN6JYp2mwLkm_hdzFkEP0Y0gZ4YVsSxrBfefZSpHkbdf6HQ";
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-        const systemPrompt = `Tu es ViA, un coach de vie/pro et planificateur doté d'une intelligence vivante. 
-        Rédige une réponse riche et fouillée comprise entre 500 et 1266 mots. 
+        const systemPrompt = `Tu es ViA, coach et planificateur intelligent. Rédige une réponse très riche et détaillée comprise entre 500 et 1266 mots. 
         Inclus obligatoirement :
         1. Une recherche approfondie des racines originelles des mots et de leur philosophie cachée (synonymes, homonymes, anti-antonymes).
         2. Une astuce et un 'Conseil Coaching Friendly'.
@@ -359,16 +331,15 @@
 
             if (data.candidates && data.candidates[0].content.parts[0].text) {
                 const reply = data.candidates[0].content.parts[0].text;
-                const formatted = reply.replace(/\n/g, '<br>');
-                UI_Chat.innerHTML += `<div class="msg-bubble via-msg">${formatted}</div>`;
+                UI_Chat.innerHTML += `<div class="msg-bubble via-msg">${reply.replace(/\n/g, '<br>')}</div>`;
                 UI_Chat.scrollTop = UI_Chat.scrollHeight;
                 speakText(reply);
             } else {
-                UI_Chat.innerHTML += `<div class="msg-bubble via-msg" style="color: #f87171;">Erreur de réponse du modèle LocalEdge.</div>`;
+                UI_Chat.innerHTML += `<div class="msg-bubble via-msg" style="color: #f87171;">Erreur de génération.</div>`;
             }
         } catch (error) {
             document.getElementById(loadId).remove();
-            UI_Chat.innerHTML += `<div class="msg-bubble via-msg" style="color: #f87171;">Erreur réseau sur l'IP ${userSessionConfig.ip} 🛑</div>`;
+            UI_Chat.innerHTML += `<div class="msg-bubble via-msg" style="color: #f87171;">Erreur réseau mobile 🛑</div>`;
         }
     }
 <!-- ↕️ -->
@@ -376,15 +347,14 @@
 
 <!--propriety style="display:none;"-->
 <!-- ↕️ -->
-<!--coLocalIPRoute➡️Dynamic-->
-<!--coPinSecurity➡️5to13Digits-->
+<!--coMobileEdgeEngine➡️Active-->
 <!--/propriety-->
 <!-- ↕️ -->
 
 <!--value style="display:none;"-->
 <!-- ↕️ -->
-<!--coLogin✅↔️SessionInit➡️Storage-->
-<!--coInput✅↔️LocalAPI➡️GeminiStream-->
+<!--coUI_Pin✅↔️SessionUnlock-->
+<!--coVoiceMic✅↔️InputText-->
 <!--/value-->
 <!-- ↕️ -->
 
@@ -392,3 +362,4 @@
 <!-- ↕️ -->
 </html>
 <!-- ↕️ -->
+
