@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d16">
+<meta name="color-scheme" content="dark light">
+<title>BLM · SuperBots</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0d16'/%3E%3Cpath d='M16 4 28 24H4z M16 28 4 8h24z' fill='none' stroke='%238aa4ff' stroke-width='2'/%3E%3C/svg%3E">
+<!-- COFF V5 · adresse = lettres (matrice) + nombre (rang) · matrice APP · un seul fichier : tout est embarqué.
+     Le backend (backend.js) sert cette page et porte la base BLM. Version V1.0A.18 -->
+<style>
+/* COFF V5 · feuille de style unique. Une peau (theme) par page SPA : chaque bot a son propre aspect. */
+:root{
+  --bg:#0b0d16;--bg2:#141829;--fg:#e9ecf6;--muted:#97a0bd;--accent:#7aa2ff;--accent2:#c58bff;
+  --user:#26304f;--bot:#171c30;--line:#2a3150;--radius:16px;--gap:12px;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  --head:var(--font);--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Mono",monospace;
+  --tabh:46px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+body{display:flex;flex-direction:column;overflow:hidden;transition:background .35s}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:.45rem .8rem;min-height:40px}
+button:hover{border-color:var(--accent)}button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+/* barre du haut et onglets */
+#top{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--line)}
+#top h1{font-size:1rem;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+#top .ver{font:.72rem var(--mono);color:var(--muted)}
+#dot{width:10px;height:10px;border-radius:50%;background:#888;box-shadow:0 0 0 2px #0003}
+#dot.ok{background:#3ddc84}#dot.llm{background:#3ddc84;box-shadow:0 0 8px #3ddc84}#dot.bad{background:#ff5d5d}
+#prov{font-size:.75rem;color:var(--muted);margin-left:auto;text-align:right}
+#tabs{display:flex;gap:4px;overflow-x:auto;padding:6px 8px;background:var(--bg2);border-bottom:1px solid var(--line);scrollbar-width:thin;flex:none}
+#tabs a{flex:none;display:flex;align-items:center;gap:6px;padding:0 12px;height:var(--tabh);min-height:44px;border-radius:12px;text-decoration:none;color:var(--muted);border:1px solid transparent;white-space:nowrap;font-size:.92rem}
+#tabs a[aria-current=page]{color:var(--fg);border-color:var(--tc,var(--accent));background:color-mix(in srgb,var(--tc,var(--accent)) 18%,transparent)}
+#banner{display:none;background:#5a1d1d;color:#ffd7d7;padding:8px 12px;font-size:.88rem}
+#banner.on{display:block}
+#pages{flex:1;min-height:0;position:relative}
+.page{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);color:var(--fg);font-family:var(--font)}
+.page.on{display:flex}
+/* en-tête de page */
+.hero{display:flex;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);flex:none}
+.hero .ico{font-size:1.9rem;line-height:1}
+.hero h2{font:700 1.15rem var(--head)}
+.hero p{font-size:.8rem;color:var(--muted)}
+.hero .grow{flex:1;min-width:0}
+details.panel{border-bottom:1px solid var(--line);flex:none}
+details.panel>summary{padding:8px 14px;cursor:pointer;font-size:.85rem;color:var(--muted);list-style:none;min-height:40px;display:flex;align-items:center}
+details.panel>summary::before{content:"▸ ";margin-right:.3em}
+details.panel[open]>summary::before{content:"▾ "}
+.panel .inner{padding:4px 14px 12px}
+/* contrôles de groupe */
+.seats{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);font-size:.82rem;min-height:36px;user-select:none}
+.chip[aria-pressed=true]{border-color:var(--hc);background:color-mix(in srgb,var(--hc) 25%,transparent);color:var(--fg)}
+.chip[disabled]{opacity:.35}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.modes button[aria-pressed=true]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.hint{font-size:.76rem;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+/* messages */
+.log{flex:1;min-height:0;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.msg{max-width:92%;position:relative}
+.msg.user{align-self:flex-end}
+.msg .who{font-size:.74rem;color:var(--muted);margin:0 6px 2px;display:flex;gap:6px;align-items:center}
+.msg .who .pv{font:.65rem var(--mono);opacity:.7}
+.bubble{position:relative;padding:10px 13px;border-radius:var(--radius);background:var(--bot);border:1px solid color-mix(in srgb,var(--hc,var(--accent)) 55%,var(--line));white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.user .bubble{background:var(--user);border-color:var(--line)}
+.bubble .aff{position:absolute;inset:0;pointer-events:auto;border-radius:inherit;cursor:pointer}
+.bubble .layer{position:absolute;inset:0;border-radius:inherit}
+.bubble a.addr{color:var(--accent);text-decoration:underline dotted;cursor:pointer}
+.sys{align-self:center;font-size:.78rem;color:var(--muted);text-align:center;padding:2px 8px}
+.ideas{align-self:stretch;border:1px dashed var(--line);border-radius:var(--radius);padding:8px 12px;background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.ideas b{font-size:.8rem;color:var(--accent)}.ideas ol{margin:.3rem 0 0 1.2rem;font-size:.92rem}
+.typing{align-self:flex-start;font-size:.8rem;color:var(--muted);padding:2px 10px}
+.typing::after{content:"";display:inline-block;width:1.2em;text-align:left;animation:dots 1.2s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+/* composeur */
+.composer{flex:none;display:flex;gap:8px;align-items:flex-end;padding:8px 10px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg2)}
+.composer textarea{flex:1;resize:none;min-height:44px;max-height:30vh;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--bg)}
+.composer .send{min-width:64px;background:var(--accent);color:#0a0a12;border-color:var(--accent);font-weight:700}
+.tools{display:flex;gap:6px;padding:4px 10px 0;flex-wrap:wrap;font-size:.8rem;background:var(--bg2)}
+.tools button{min-height:32px;padding:.2rem .6rem;font-size:.8rem}
+/* pages techniques */
+.scroll{flex:1;min-height:0;overflow:auto;padding:12px 14px 24px}
+.scroll h3{margin:14px 0 6px;font-size:1rem}
+.card{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--bg2);margin:8px 0}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:.84rem;margin:8px 0}
+label.f input,label.f select{padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);min-height:40px}
+label.inl{display:flex;gap:8px;align-items:center;margin:8px 0;min-height:36px}
+input[type=range]{width:100%}
+pre.coff{white-space:pre-wrap;font:.78rem/1.4 var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;overflow:auto;max-height:50vh}
+.res{display:flex;flex-direction:column;gap:4px}.res button{text-align:left}
+canvas#hs,canvas#mk{width:100%;border-radius:14px;border:1px solid var(--line);background:#000;display:block;touch-action:none}
+canvas#mk{height:190px}
+.led{display:inline-block;width:9px;height:9px;border-radius:50%;background:#777;margin-right:5px}.led.ok{background:#3ddc84}.led.ko{background:#ff5d5d}
+.gauge{height:10px;border-radius:6px;background:var(--bg);border:1px solid var(--line);overflow:hidden}.gauge i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#fff,#ffd34d,#ff7a3b)}
+.stages{display:flex;gap:6px;font-size:.78rem;color:var(--muted);flex-wrap:wrap}.stages span.on{color:var(--fg);font-weight:700}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* ========================= LES PEAUX : un aspect différent par page ========================= */
+/* Famille : cosmos, bulles rondes lumineuses */
+[data-theme=famille]{--bg:#080a14;--bg2:#10142a;--accent:#8aa4ff;--accent2:#d28bff;--bot:#141a35;--user:#2a2f5e;--radius:20px;
+  background:radial-gradient(1200px 500px at 50% -10%,#1d2252 0%,transparent 60%),#080a14}
+[data-theme=famille] .bubble{box-shadow:0 0 18px color-mix(in srgb,var(--hc,#8aa4ff) 22%,transparent)}
+/* Superbot : anneaux de conscience */
+[data-theme=superbot]{--bg:#06122b;--bg2:#0b1d42;--accent:#5aa9ff;--bot:#0d2250;--user:#163a73;--line:#1d3f7a;--radius:26px;
+  background:repeating-radial-gradient(circle at 50% 38%,#0a1e47 0 38px,#06122b 38px 76px)}
+[data-theme=superbot] .hero h2{letter-spacing:.14em;text-transform:uppercase;font-weight:300}
+[data-theme=superbot] .bubble{border-width:1px;box-shadow:0 0 0 4px #5aa9ff14}
+/* Justicia : tablette de loi, or sur parchemin sombre, bords doubles */
+[data-theme=justicia]{--bg:#1a1508;--bg2:#251d0b;--fg:#f4ecd5;--muted:#c2b387;--accent:#e2b93b;--bot:#2b2210;--user:#3a2f14;--line:#6d5a1f;--radius:3px;--font:Georgia,"Times New Roman","Noto Serif",serif;--head:Georgia,"Times New Roman",serif;
+  background:linear-gradient(180deg,#1a1508,#120e05)}
+[data-theme=justicia] .bubble{border:3px double #b8932a;background:#2b2210}
+[data-theme=justicia] .hero h2{font-variant:small-caps;letter-spacing:.08em}
+[data-theme=justicia] .hero{border-bottom:3px double #6d5a1f}
+[data-theme=justicia] .msg .who::before{content:"§";color:#e2b93b}
+/* Golem Motor : forge, découpes anguleuses, braises */
+[data-theme=golem]{--bg:#120e0c;--bg2:#1d1511;--accent:#ff7a2e;--accent2:#ffb02e;--bot:#241812;--user:#3b2314;--line:#4a2f1d;--radius:0;--head:Impact,"Arial Narrow Bold","Haettenschweiler",system-ui,sans-serif;
+  background:linear-gradient(0deg,#3a1604 0,#120e0c 38%)}
+[data-theme=golem] .hero h2{font-family:var(--head);text-transform:uppercase;letter-spacing:.06em;font-weight:400;color:#ffb02e;text-shadow:0 0 12px #ff7a2e80}
+[data-theme=golem] .bubble{clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));border:0;background:linear-gradient(135deg,#3a2112,#241812);box-shadow:inset 3px 0 0 #ff7a2e}
+[data-theme=golem] .msg.user .bubble{background:linear-gradient(135deg,#4d2a14,#3b2314)}
+[data-theme=golem] button{border-radius:0;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+/* B.T.B : terminal, ligne de balayage, boîtes en pointillé */
+[data-theme=btb]{--bg:#030a05;--bg2:#06130a;--fg:#c8ffd4;--muted:#5fae75;--accent:#39ff7a;--bot:#04100a;--user:#0a2413;--line:#14532d;--radius:2px;--font:var(--mono);--head:var(--mono);
+  background:repeating-linear-gradient(0deg,#030a05 0 2px,#04100a 2px 4px)}
+[data-theme=btb] .bubble{border:1px dashed #39ff7a;font-size:.92rem}
+[data-theme=btb] .msg:not(.user) .bubble::before{content:"> ";color:#39ff7a}
+[data-theme=btb] .hero h2::after{content:"_";animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+/* ViA : pastel chaud, bulles pilule qui rebondissent doucement */
+[data-theme=via]{--bg:#2a1220;--bg2:#3a1a2e;--fg:#fff1f6;--muted:#f1b8cd;--accent:#ff7eb6;--accent2:#ffc27e;--bot:#4a2039;--user:#6a2a4c;--line:#7a3a5c;--radius:28px;--font:"Trebuchet MS","Segoe UI",system-ui,"Noto Sans",sans-serif;
+  background:radial-gradient(circle at 20% 10%,#5a2346 0,transparent 45%),radial-gradient(circle at 85% 80%,#5a3a23 0,transparent 40%),#2a1220}
+[data-theme=via] .bubble{border:2px solid #ff7eb6;animation:bob 4.5s ease-in-out infinite}
+[data-theme=via] .msg.user .bubble{border-color:#ffc27e}
+@keyframes bob{50%{transform:translateY(-2px) rotate(-.2deg)}}
+[data-theme=via] .hero h2{font-weight:800}
+/* Matrixia : grille cyan, cellules de tableau avec adresse */
+[data-theme=matrixia]{--bg:#041217;--bg2:#07202a;--fg:#d8f7ff;--muted:#7bb8c8;--accent:#27e0ff;--bot:#06222d;--user:#0a3140;--line:#0f5062;--radius:0;--font:var(--mono);--head:var(--mono);
+  background-color:#041217;background-image:linear-gradient(#0c3947 1px,transparent 1px),linear-gradient(90deg,#0c3947 1px,transparent 1px);background-size:24px 24px}
+[data-theme=matrixia] .bubble{border:1px solid #27e0ff;background:#06222dee;font-size:.9rem}
+[data-theme=matrixia] .msg:not(.user)::before{content:attr(data-addr);position:absolute;right:6px;top:-9px;font:.62rem var(--mono);background:#041217;color:#27e0ff;padding:0 4px;border:1px solid #0f5062;z-index:2}
+/* Mirroria : argent clair, reflet sous chaque bulle */
+[data-theme=mirroria]{--bg:#dfe3ee;--bg2:#f3f5fa;--fg:#1c1f2e;--muted:#5d6580;--accent:#7a5cff;--bot:#fff;--user:#e8e1ff;--line:#b9c0d6;--radius:14px;
+  background:linear-gradient(115deg,#f5f7fc 0,#cfd5e6 30%,#f5f7fc 48%,#c3cade 70%,#eef0f8 100%)}
+[data-theme=mirroria] .bubble{background:linear-gradient(180deg,#fff,#eef0f8);box-shadow:0 14px 10px -12px #5d658090,0 2px 0 #fff inset}
+[data-theme=mirroria] .msg:not(.user)::after{content:"";display:block;height:14px;margin:2px 6px 0;border-radius:50%;background:radial-gradient(ellipse at 50% 0,#7a5cff30,transparent 70%);transform:scaleY(-1);opacity:.7}
+[data-theme=mirroria] #tabs,[data-theme=mirroria] .hero{color:#1c1f2e}
+/* Théo : parchemin bleu et blanc, serif, bulles en rouleau */
+[data-theme=theo]{--bg:#f1ead6;--bg2:#e6dcc0;--fg:#1b2a52;--muted:#5d6a8f;--accent:#1f4aa8;--bot:#fbf6e6;--user:#dbe5fa;--line:#b7a878;--radius:4px;--font:Georgia,"Times New Roman","Noto Serif Hebrew","Noto Serif",serif;--head:Georgia,serif;
+  background:linear-gradient(90deg,#e6dcc0 0,#f1ead6 6%,#f1ead6 94%,#e6dcc0 100%)}
+[data-theme=theo] .bubble{border:0;border-top:3px solid #1f4aa8;border-bottom:3px solid #1f4aa8;background:#fbf6e6;font-size:1.02rem}
+[data-theme=theo] .hero h2::after{content:" א";color:#1f4aa8;opacity:.55}
+[data-theme=theo] .hero h2{font-style:italic}
+/* Synerbot : violet, fils de liaison entre les bulles */
+[data-theme=synerbot]{--bg:#150a26;--bg2:#1f1038;--accent:#c58bff;--accent2:#6fe3ff;--bot:#26124a;--user:#3a1d6e;--line:#4a2a85;--radius:18px;
+  background:linear-gradient(160deg,#150a26,#230f3f 55%,#0f1c3a)}
+[data-theme=synerbot] .log{position:relative}
+[data-theme=synerbot] .msg:not(:last-child)::after{content:"";position:absolute;left:22px;bottom:-12px;width:2px;height:12px;background:linear-gradient(#c58bff,#6fe3ff)}
+[data-theme=synerbot] .bubble{border-image:linear-gradient(135deg,#c58bff,#6fe3ff) 1;border-radius:0}
+/* Atelier, Base, Réglages */
+[data-theme=atelier]{--bg:#0a0a0a;--bg2:#161616;--accent:#ffd34d;--line:#333}
+[data-theme=base]{--bg:#0c1118;--bg2:#131b26;--accent:#6fe3ff}
+[data-theme=reglages]{--bg:#101014;--bg2:#1a1a22;--accent:#9aa7ff}
+
+/* compact et lisible sur téléphone */
+.modes button{min-height:34px;padding:.2rem .6rem;font-size:.84rem}
+.chip{min-height:32px;padding:2px 9px;font-size:.8rem}
+input[type=text],input[type=password],input[type=search],select{background:var(--bg2);color:var(--fg);border:1px solid var(--line);border-radius:10px}
+
+</style>
+</head>
+<body data-theme="famille">
+<header id="top">
+  <span id="dot" title="état du backend" role="img" aria-label="état du backend"></span>
+  <h1>BLM · SuperBots</h1><span class="ver">V1.0A.18</span>
+  <span id="prov" aria-live="polite">…</span>
+</header>
+<nav id="tabs" aria-label="Pages"></nav>
+<div id="banner" role="status"></div>
+<main id="pages"></main>
+<noscript>Cette page a besoin de JavaScript.</noscript>
+<script>
+/* COFF V5 · moteur de rendu, d'image et de son (un seul fichier, aucune dépendance)
+   AFF  : l'affichage par ballons de peinture (une cellule = un ballon qui éclate)
+   HS   : le filtre High Stream (WebGL2, repli Canvas 2D) : ombre/lumière → netteté → couleur → reflet
+   MRK  : la merkaba de la famille (double tétraèdre), placement provisoire des bots
+   AUD  : son (WebAudio, placement binaural HRTF) et voix du navigateur
+   Honnêteté : ce sont des filtres et des animations de page web, pas le shader complet de 3 158 réglages. */
+'use strict';
+const ENG = (() => {
+  const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+  const hsl = (h, s, l, a) => 'hsla(' + h + ',' + s + '%,' + l + '%,' + (a == null ? 1 : a) + ')';
+
+  /* ====================== AFF : ballons de peinture ====================== */
+  const AFF = (() => {
+    const running = new Set();
+    function noise(w, h) {            // relief : un champ de hauteur lisse, 4 octaves de bruit de valeur
+      const g = [], N = 24; for (let i = 0; i < (N + 1) * (N + 1); i++) g.push(Math.random());
+      const at = (x, y) => { x = Math.max(0, Math.min(1, x)); y = Math.max(0, Math.min(1, y)); const fx = x * N, fy = y * N, ix = Math.min(N - 1, fx | 0), iy = Math.min(N - 1, fy | 0), tx = fx - ix, ty = fy - iy;
+        const a = g[iy * (N + 1) + ix], b = g[iy * (N + 1) + ix + 1], c = g[(iy + 1) * (N + 1) + ix], d = g[(iy + 1) * (N + 1) + ix + 1];
+        const sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty); return (a + (b - a) * sx) * (1 - sy) + (c + (d - c) * sx) * sy; };
+      return at;
+    }
+    /* reveal(bubble, hue, opts) : pose une couche de ballons sur la bulle ; ils éclatent dans l'ordre de lecture.
+       Sécurité AFF : le texte reste dans la page (lisible, sélectionnable) ; la durée totale est bornée ; clic = tout afficher. */
+    function reveal(bubble, hue, o) {
+      o = Object.assign({ cw: 12, ch: 24, wave: 40, maxMs: 1100, budgetMs: 4, onDone: null }, o || {});
+      if (reduced() || o.off) { o.onDone && o.onDone(); return null; }
+      const W = bubble.clientWidth, H = bubble.clientHeight;
+      if (W < 10 || H < 10) { o.onDone && o.onDone(); return null; }
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      let cw = o.cw, ch = o.ch;
+      while ((W / cw) * (H / ch) > 6000) { cw *= 1.25; ch *= 1.25; }       // jamais plus de 6 000 ballons
+      const cols = Math.ceil(W / cw), rows = Math.ceil(H / ch), total = cols * rows;
+      const layer = document.createElement('canvas'), fx = document.createElement('canvas');
+      [layer, fx].forEach(c => { c.width = W * dpr; c.height = H * dpr; c.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;'; });
+      fx.style.pointerEvents = 'none'; layer.className = 'aff'; layer.title = 'Cliquer : tout afficher';
+      bubble.appendChild(layer); bubble.appendChild(fx);
+      const L = layer.getContext('2d'), F = fx.getContext('2d'); L.scale(dpr, dpr); F.scale(dpr, dpr);
+      const n = noise(W, H);
+      // chaque ballon : teinte selon le relief (creux = plus de peinture), décoloration selon la profondeur avant/arrière
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const x = c * cw, y = r * ch, u = (c + .5) / cols, v = (r + .5) / rows;
+        const h0 = n(u, v), gx = n(u + 1 / cols, v) - n(u - 1 / cols, v), gy = n(u, v + 1 / rows) - n(u, v - 1 / rows);
+        const depth = 1 - h0, lit = Math.max(0, Math.min(1, 0.5 + (gx + gy) * 2.2));
+        const sat = 55 + depth * 35, lum = 24 + lit * 26 - depth * 6, hh = hue + (h0 - .5) * 40;
+        const grd = L.createRadialGradient(x + cw * .35, y + ch * .3, 1, x + cw / 2, y + ch / 2, Math.max(cw, ch) * .75);
+        grd.addColorStop(0, hsl(hh, sat, lum + 22, .96)); grd.addColorStop(1, hsl(hh, sat, lum - 6, .96));
+        L.fillStyle = grd; L.beginPath();
+        if (L.roundRect) L.roundRect(x + .5, y + .5, cw - 1, ch - 1, Math.min(cw, ch) * .45); else L.rect(x + .5, y + .5, cw - 1, ch - 1);
+        L.fill();
+      }
+      const dur = Math.max(.45, Math.min(o.maxMs / 1000, total / 120));      // durée bornée : entre 0,45 s et 1,1 s
+      const wave = Math.max(1, Math.ceil(total / (60 * dur)));
+      let next = 0, parts = [], raf = 0, done = false, t0 = performance.now();
+      const st = { skip, done: () => done };
+      function pop(i) {
+        const c = i % cols, r = (i / cols) | 0, x = c * cw, y = r * ch;
+        L.clearRect(x - .5, y - .5, cw + 1, ch + 1);
+        if (parts.length < 160 && Math.random() < .35) for (let k = 0; k < 2; k++) parts.push({ x: x + cw / 2, y: y + ch / 2, vx: (Math.random() - .5) * 3.4, vy: -Math.random() * 2.2, life: 1, s: 1 + Math.random() * 1.8, h: hue + (Math.random() - .5) * 50 });
+      }
+      function frame() {
+        const t = performance.now(); let cnt = 0;
+        while (next < total && cnt < wave && performance.now() - t < o.budgetMs) { pop(next++); cnt++; }
+        F.clearRect(0, 0, W, H);
+        for (let k = parts.length - 1; k >= 0; k--) { const p = parts[k]; p.x += p.vx; p.y += p.vy; p.vy += .16; p.life -= .09; if (p.life <= 0) { parts.splice(k, 1); continue; } F.fillStyle = hsl(p.h, 80, 60, p.life * .7); F.beginPath(); F.arc(p.x, p.y, p.s, 0, 6.3); F.fill(); }
+        if (next < total || parts.length) raf = requestAnimationFrame(frame); else finish();
+      }
+      function finish() { if (done) return; done = true; cancelAnimationFrame(raf); layer.remove(); fx.remove(); running.delete(st); o.onDone && o.onDone(); }
+      function skip() { next = total; parts = []; finish(); }
+      layer.addEventListener('click', skip);
+      running.add(st); raf = requestAnimationFrame(frame);
+      return st;
+    }
+    return { reveal, skipAll() { [...running].forEach(s => s.skip()); }, count: () => running.size };
+  })();
+
+  /* ====================== HS : le filtre High Stream ====================== */
+  const HS = (() => {
+    const VS = '#version 300 es\nin vec2 p;out vec2 uv;void main(){uv=p*.5+.5;uv.y=1.-uv.y;gl_Position=vec4(p,0.,1.);}';
+    const FS = `#version 300 es
+precision highp float;in vec2 uv;out vec4 o;uniform sampler2D T;uniform vec2 R;
+uniform float s1,s2,s3,s4,time,split,horizon;
+float lum(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}
+vec3 tx(vec2 q){return texture(T,q).rgb;}
+void main(){
+  vec2 px=1./R; vec3 c0=tx(uv), c=c0;
+  // ① ombre / lumière : on relève les creux et on tient les hautes lumières ; détail local gardé
+  vec3 b=vec3(0.);float k=0.;
+  for(int i=-2;i<=2;i++)for(int j=-2;j<=2;j++){b+=tx(uv+vec2(float(i),float(j))*px*3.);k+=1.;} b/=k;
+  float L=lum(c), bl=lum(b);
+  c*=1.+s1*.55*(1.-smoothstep(0.,.5,L));
+  c*=1.-s1*.22*smoothstep(.72,1.,L);
+  c+= (L-bl)*s1*.7*(1.-L);
+  // ② netteté : seulement sur les contours, jamais de faux détail
+  vec3 bs=(tx(uv+vec2(px.x,0.))+tx(uv-vec2(px.x,0.))+tx(uv+vec2(0.,px.y))+tx(uv-vec2(0.,px.y)))*.25;
+  float edge=length(c0-bs);
+  c+=(c0-bs)*s2*2.2*smoothstep(.02,.12,edge);
+  // ③ couleur : chaleur (bleu / blanc / jaune), saturation, pouls de teinte sur les tons chair
+  float lc=lum(c); c=mix(vec3(lc),c,1.+.4*s3);
+  c.r*=1.+.07*s3; c.b*=1.-.06*s3;
+  float skin=smoothstep(.0,.2,c.r-c.g)*smoothstep(.0,.15,c.g-c.b)*(1.-smoothstep(.55,.8,lc));
+  float pulse=.5+.5*sin(time*6.9);              // ~66 battements par minute
+  c.r+=skin*pulse*.06*s3; c.g+=skin*pulse*.015*s3;
+  // ④ reflet : voyage miroir sous l'horizon + dispersion jaune / bleu / rouge sur les hautes lumières
+  float below=smoothstep(horizon,1.,uv.y);
+  vec2 ru=vec2(uv.x+sin(uv.y*60.+time*2.)*.004*below, 2.*horizon-uv.y);
+  vec3 rf=tx(clamp(ru,0.,1.));
+  c=mix(c,rf*.92,s4*.55*below*(1.-.5*(uv.y-horizon)/max(.001,1.-horizon)));
+  float hi=smoothstep(.75,1.,lum(c0));
+  vec3 disp=vec3(tx(uv+vec2(2.,0.)*px*2.).r,tx(uv).g,tx(uv-vec2(2.,0.)*px*2.).b);
+  c=mix(c,max(c,disp*vec3(1.1,1.0,1.12)),s4*.5*hi);
+  c=clamp(c,0.,1.);
+  if(uv.x<split)c=c0;
+  if(abs(uv.x-split)<px.x*1.5)c=vec3(1.);
+  o=vec4(c,1.);
+}`;
+    let cv, gl, prog, tex, U = {}, mode = 'aucun', src = null, w = 0, h = 0, ctx2 = null;
+    const P = { s1: 0, s2: 0, s3: 0, s4: 0, split: 0.0, horizon: .62 };
+    let dirty = true, frames = { computed: 0, copied: 0 }, raf = 0, last = null;
+    function init(canvas) {
+      cv = canvas;
+      try { gl = cv.getContext('webgl2', { antialias: false, preserveDrawingBuffer: false }); } catch (e) { gl = null; }
+      if (gl) {
+        const sh = (t, s) => { const x = gl.createShader(t); gl.shaderSource(x, s); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(x)); return x; };
+        try {
+          prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
+          if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+          gl.useProgram(prog);
+          const vb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+          const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+          ['T', 'R', 's1', 's2', 's3', 's4', 'time', 'split', 'horizon'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+          tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+          [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR));
+          [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE));
+          mode = 'WebGL2';
+        } catch (e) { console.warn('HS WebGL2 :', e.message); gl = null; }
+      }
+      if (!gl) { ctx2 = cv.getContext('2d'); mode = ctx2 ? 'Canvas 2D (repli)' : 'aucun'; }
+      loop();
+      return mode;
+    }
+    function setSource(canvasOrImg) {
+      src = canvasOrImg; w = src.width || src.naturalWidth; h = src.height || src.naturalHeight;
+      const maxW = 1280, sc = Math.min(1, maxW / w); cv.width = Math.round(w * sc); cv.height = Math.round(h * sc);
+      if (gl) { gl.bindTexture(gl.TEXTURE_2D, tex); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src); gl.viewport(0, 0, cv.width, cv.height); }
+      dirty = true;
+    }
+    function set(k, v) { if (P[k] !== v) { P[k] = v; dirty = true; } }
+    function draw(t) {
+      if (!src) return;
+      if (gl) {
+        gl.useProgram(prog); gl.uniform1i(U.T, 0); gl.uniform2f(U.R, cv.width, cv.height);
+        ['s1', 's2', 's3', 's4', 'split', 'horizon'].forEach(k => gl.uniform1f(U[k], P[k])); gl.uniform1f(U.time, t);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      } else if (ctx2) {          // repli : approximations CSS des quatre étapes
+        ctx2.filter = 'none'; ctx2.drawImage(src, 0, 0, cv.width, cv.height);
+        const c = 1 + P.s1 * .15 + P.s2 * .1, s = 1 + P.s3 * .35, b = 1 + P.s1 * .12, hue = -P.s3 * 6;
+        const tmp = document.createElement('canvas'); tmp.width = cv.width; tmp.height = cv.height; const tc = tmp.getContext('2d');
+        tc.filter = 'contrast(' + c + ') saturate(' + s + ') brightness(' + b + ') hue-rotate(' + hue + 'deg)'; tc.drawImage(src, 0, 0, cv.width, cv.height);
+        const sx = Math.floor(cv.width * P.split);
+        ctx2.drawImage(tmp, sx, 0, cv.width - sx, cv.height, sx, 0, cv.width - sx, cv.height);
+        if (P.s4 > 0) { const hy = Math.floor(cv.height * P.horizon); ctx2.save(); ctx2.globalAlpha = .45 * P.s4; ctx2.translate(0, 2 * hy); ctx2.scale(1, -1); ctx2.drawImage(cv, 0, 0); ctx2.restore(); }
+      }
+    }
+    function loop() {
+      raf = requestAnimationFrame(loop);
+      // presse-papier de pixels (HS9) : si rien n'a changé, l'image précédente est recopiée, pas recalculée
+      const animated = P.s3 > 0 && gl;                      // le pouls de teinte bouge
+      if (dirty || animated || P.s4 > 0 && gl) { draw(performance.now() / 1000); frames.computed++; dirty = false; } else frames.copied++;
+    }
+    return { init, setSource, set, P, frames, mode: () => mode, hasSrc: () => !!src };
+  })();
+
+  /* scène de démonstration : coucher de soleil, mer, montagne, bonhomme allumette à tête d'émoji */
+  function demoScene(emoji) {
+    const c = document.createElement('canvas'); c.width = 960; c.height = 540; const g = c.getContext('2d');
+    const sky = g.createLinearGradient(0, 0, 0, 330); sky.addColorStop(0, '#16203f'); sky.addColorStop(.55, '#6a3a63'); sky.addColorStop(1, '#f2a35c'); g.fillStyle = sky; g.fillRect(0, 0, 960, 336);
+    for (let i = 0; i < 70; i++) { g.fillStyle = 'rgba(255,255,255,' + (Math.random() * .6) + ')'; g.fillRect(Math.random() * 960, Math.random() * 170, 1.5, 1.5); }
+    const sun = g.createRadialGradient(660, 300, 8, 660, 300, 140); sun.addColorStop(0, '#fff6c8'); sun.addColorStop(.25, '#ffd26a'); sun.addColorStop(1, 'rgba(255,150,70,0)'); g.fillStyle = sun; g.fillRect(480, 130, 360, 220);
+    g.fillStyle = '#1c1730'; g.beginPath(); g.moveTo(0, 336); g.lineTo(130, 190); g.lineTo(235, 280); g.lineTo(350, 160); g.lineTo(500, 336); g.fill();
+    const sea = g.createLinearGradient(0, 336, 0, 540); sea.addColorStop(0, '#2a3f73'); sea.addColorStop(1, '#0c1330'); g.fillStyle = sea; g.fillRect(0, 336, 960, 204);
+    g.fillStyle = 'rgba(255,214,120,.55)'; for (let i = 0; i < 26; i++) g.fillRect(660 - 70 + Math.random() * 140 - i, 345 + i * 7, 30 + Math.random() * 60, 2.5);
+    g.fillStyle = '#d9a37a'; g.fillRect(0, 468, 960, 72);            // plage
+    g.strokeStyle = '#150f20'; g.lineWidth = 6; g.lineCap = 'round'; g.beginPath();   // bonhomme allumette
+    g.moveTo(210, 455); g.lineTo(210, 395); g.moveTo(210, 412); g.lineTo(184, 440); g.moveTo(210, 412); g.lineTo(238, 436); g.moveTo(210, 455); g.lineTo(190, 500); g.moveTo(210, 455); g.lineTo(234, 498); g.stroke();
+    g.font = '46px system-ui,"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji"'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(emoji || '🙂', 210, 372);
+    return c;
+  }
+
+  /* ====================== MRK : la merkaba de la famille ====================== */
+  const MRK = (() => {
+    let cv, g, bots = [], active = {}, t = 0, raf = 0, user = null;
+    // 10 points : 8 sommets du cube + 2 pôles ; Superbot = pôle haut, Synerbot = pôle bas, les 7 autres sur 7 sommets (provisoire)
+    const V = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1], [-1, 1, 1], [1, -1, 1], [1, 1, -1]];
+    const T1 = [0, 1, 2, 3], T2 = [4, 5, 6, 7];
+    const E = a => { const o = []; for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) o.push([a[i], a[j]]); return o; };
+    function place(list) {
+      const order = list.map(b => b.id); const mid = order.filter(id => id !== 'superbot' && id !== 'synerbot');
+      bots = list.map(b => { let p; if (b.id === 'superbot') p = [0, 1.55, 0]; else if (b.id === 'synerbot') p = [0, -1.55, 0]; else p = V[mid.indexOf(b.id) % 8]; return { id: b.id, ico: b.ico, hue: b.hue, p }; });
+    }
+    function proj(p, a, b, W, H) {
+      let [x, y, z] = p; const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
+      let x1 = x * ca + z * sa, z1 = -x * sa + z * ca; let y1 = y * cb - z1 * sb, z2 = y * sb + z1 * cb;
+      const k = 3.4 / (3.4 + z2 * .5), s = Math.min(W, H) * .26; return [W / 2 + x1 * s * k, H / 2 - y1 * s * k, z2];
+    }
+    function draw() {
+      raf = requestAnimationFrame(draw); if (!cv || !cv.isConnected || cv.offsetParent === null) return;
+      const dpr = Math.min(2, devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
+      if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+      g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+      t += reduced() ? 0 : .008; const a = t, b = .35;
+      const edge = (A, B, col, al) => { const p = proj(A, a, b, W, H), q = proj(B, a, b, W, H); g.strokeStyle = col; g.globalAlpha = al; g.lineWidth = 1.2; g.beginPath(); g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]); g.stroke(); };
+      E(T1).forEach(([i, j]) => edge(V[i], V[j], '#8aa4ff', .7)); E(T2).forEach(([i, j]) => edge(V[i], V[j], '#ffb86b', .7));
+      edge([0, 1.55, 0], [0, -1.55, 0], '#ffffff', .25);
+      bots.forEach(b => {
+        const q = proj(b.p, a, b2(), W, H), on = active[b.id] || 0;
+        g.globalAlpha = 1; g.fillStyle = hsl(b.hue, 80, 60, .25 + on * .6); g.beginPath(); g.arc(q[0], q[1], 9 + on * 9, 0, 6.3); g.fill();
+        g.fillStyle = hsl(b.hue, 85, 65, 1); g.beginPath(); g.arc(q[0], q[1], 4, 0, 6.3); g.fill();
+        g.globalAlpha = .95; g.font = '14px system-ui,"Noto Color Emoji"'; g.textAlign = 'center'; g.fillText(b.ico, q[0], q[1] - 12 - on * 4);
+        if (on > 0) active[b.id] = Math.max(0, on - .012);
+      });
+      const c = proj([0, 0, 0], a, b, W, H); g.globalAlpha = .9; g.strokeStyle = '#fff'; g.beginPath(); g.arc(c[0], c[1], 6, 0, 6.3); g.stroke(); g.font = '10px system-ui'; g.fillStyle = '#fff'; g.fillText('toi', c[0], c[1] + 18);
+      g.globalAlpha = 1;
+    }
+    const b2 = () => .35;
+    return { init(canvas, list) { cv = canvas; g = cv.getContext('2d'); place(list); if (!raf) draw(); }, pulse(id) { active[id] = 1; } };
+  })();
+
+  /* ====================== AUD : son, placement binaural, voix ====================== */
+  const AUD = (() => {
+    let ac = null, master = null, on = false, tts = false, lastPop = 0;
+    function ctx() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); master = ac.createGain(); master.gain.value = .5; master.connect(ac.destination); } catch (e) { ac = null; } } if (ac && ac.state === 'suspended') ac.resume(); return ac; }
+    function panner(pos) {
+      const p = ac.createPanner(); p.panningModel = 'HRTF'; p.distanceModel = 'inverse'; p.refDistance = 1;
+      p.positionX.value = (pos && pos[0] || 0) * 2; p.positionY.value = (pos && pos[1] || 0) * 1.5; p.positionZ.value = -(pos && pos[2] || 0) * 2; return p;
+    }
+    function chime(bot) {
+      if (!on || !ctx()) return;
+      const t = ac.currentTime, f = bot.f0 || 330, pn = panner(bot.pos); pn.connect(master);
+      [1, 2.01, 3.02].forEach((m, i) => { const o = ac.createOscillator(), e = ac.createGain(); o.type = i ? 'sine' : 'triangle'; o.frequency.value = f * m; e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(.18 / (i + 1), t + .02); e.gain.exponentialRampToValueAtTime(.0008, t + .55 + i * .1); o.connect(e); e.connect(pn); o.start(t); o.stop(t + .8); });
+    }
+    function pop() {               // SFX d'éclatement : bruit court, au plus 12 par seconde
+      if (!on || !ctx()) return; const n = performance.now(); if (n - lastPop < 83) return; lastPop = n;
+      const len = ac.sampleRate * .04, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+      const s = ac.createBufferSource(); s.buffer = buf; const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 900 + Math.random() * 1500; const e = ac.createGain(); e.gain.value = .07;
+      const pn = panner([Math.random() * 2 - 1, Math.random() - .5, Math.random() * 2 - 1]); s.connect(f); f.connect(e); e.connect(pn); pn.connect(master); s.start();
+    }
+    function speak(text, bot) {
+      if (!tts || !('speechSynthesis' in window)) return;
+      const clean = text.replace(/\p{Extended_Pictographic}️?/gu, '').replace(/[«»*#_`]/g, '').replace(/\b[A-Z]{2,3}[0-9]{1,4}\b/g, m => m.split('').join(' ')).slice(0, 700);
+      const u = new SpeechSynthesisUtterance(clean); u.lang = 'fr-FR'; u.pitch = bot.pitch || 1; u.rate = bot.rate || 1;
+      const v = speechSynthesis.getVoices().find(x => /^fr/i.test(x.lang)); if (v) u.voice = v; speechSynthesis.speak(u);
+    }
+    return { enable(v) { on = !!v; if (on) ctx(); }, enableTTS(v) { tts = !!v; if (!v && 'speechSynthesis' in window) speechSynthesis.cancel(); }, chime, pop, speak, stop() { try { speechSynthesis.cancel(); } catch (e) { } }, supported: () => !!(window.AudioContext || window.webkitAudioContext), ttsSupported: () => 'speechSynthesis' in window };
+  })();
+
+  return { AFF, HS, MRK, AUD, demoScene };
+})();
+
+</script>
+<script>
+/* COFF V5 · l'application : pages SPA (une par bot), chat solo ou de groupe, atelier d'image, base BLM, réglages */
+'use strict';
+(() => {
+  const $ = (s, r) => (r || document).querySelector(s);
+  const el = (tag, attrs, ...kids) => { const e = document.createElement(tag); for (const k in (attrs || {})) { if (k === 'class') e.className = attrs[k]; else if (k === 'text') e.textContent = attrs[k]; else if (k.startsWith('aria-')) e.setAttribute(k, String(attrs[k])); else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]); else if (attrs[k] !== false && attrs[k] != null) e.setAttribute(k, attrs[k] === true ? '' : attrs[k]); } kids.flat().forEach(k => k != null && e.append(k.nodeType ? k : document.createTextNode(k))); return e; };
+  const store = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }, del(k) { try { localStorage.removeItem(k); } catch (e) { } } };
+
+  /* ---------------- la famille (copie locale pour l'affichage immédiat ; le backend envoie la même liste) ---------------- */
+  const BOTS = [
+    { id: 'superbot', n: 'Superbot', ico: '🌐', hue: 215, voice: "Je garde le fil de ce qu'on veut vraiment.", role: 'La Conscience : relie tous les bots au projet', pos: [0, 1, 0], pitch: 1, rate: 1, f0: 392 },
+    { id: 'justicia', n: 'Justicia', ico: '⚖️', hue: 45, voice: "D'abord la limite, ensuite la liberté.", role: 'La Balance : droits, lois internationales, limites', pos: [-1, 0, .3], pitch: .85, rate: .95, f0: 220 },
+    { id: 'golem', n: 'Golem Motor', ico: '🔥', hue: 24, voice: "L'équilibre d'abord, l'idée la plus folle ensuite, selon les règles.", role: 'Le Fou-Forgeron : moteur d’image High Stream', pos: [1, 0, .3], pitch: .75, rate: .95, f0: 165 },
+    { id: 'btb', n: 'B.T.B', ico: '⚡', hue: 130, voice: 'Ta règle, je la teste en la cassant.', role: 'Le Casseur de règles : ingénierie, sciences, tests', pos: [.6, -.2, .9], pitch: .9, rate: 1.15, f0: 262 },
+    { id: 'via', n: 'ViA', ico: '💗', hue: 330, voice: 'Bien dosé, jamais trop. Le tout, c’est de tout faire maintenant.', role: 'La Chaleur : vulgarise, la super pote', pos: [-.6, .2, .9], pitch: 1.25, rate: 1.05, f0: 523 },
+    { id: 'matrixia', n: 'Matrixia', ico: '🧮', hue: 185, voice: 'Tout a une adresse, rien ne se perd.', role: 'La Cartographe : adresses COFF V5 (HS0, KIF5…)', pos: [0, -1, .3], pitch: 1.05, rate: 1, f0: 330 },
+    { id: 'mirroria', n: 'Mirroria', ico: '🪞', hue: 270, voice: 'Le défaut d’abord, la qualité ensuite.', role: 'Le Miroir : antonymes, défauts, anti-antonymes', pos: [-.2, 0, -1], pitch: 1.1, rate: .95, f0: 440 },
+    { id: 'theo', n: 'Théo', ico: '📜', hue: 210, voice: 'Je relie ce qui a été cru, ce qui a été vécu et ce qui a été trouvé.', role: 'Le Passeur : théologien-historien, voix multiples', pos: [.2, .3, -1], pitch: .8, rate: .9, f0: 247 },
+    { id: 'synerbot', n: 'Synerbot', ico: '🔗', hue: 290, voice: 'Je parle en dernier pour tout relier.', role: 'Le Lien : conclut seul, sans nouvelle idée', pos: [0, -1, -.3], pitch: 1, rate: 1, f0: 349 }
+  ];
+  const BY = Object.fromEntries(BOTS.map(b => [b.id, b]));
+  const PAGES = [
+    { id: 'famille', n: 'Famille', ico: '👨‍👩‍👧‍👦', hue: 235, chat: true, role: 'Toute la famille SuperBots : 4 bots maximum par échange, plus toi', def: { mode: 'groupe', seats: ['golem', 'via', 'synerbot'] } },
+    ...BOTS.map(b => ({ id: b.id, n: b.n, ico: b.ico, hue: b.hue, chat: true, role: b.role, voice: b.voice, def: { mode: 'solo', seats: [b.id] } })),
+    { id: 'atelier', n: 'Atelier HS', ico: '🎞️', hue: 48, role: 'Moteur de rendu : filtre High Stream, image, merkaba' },
+    { id: 'base', n: 'Base BLM', ico: '🗂️', hue: 190, role: 'Inspecter la base : adresses, matrices, lexique' },
+    { id: 'reglages', n: 'Réglages', ico: '⚙️', hue: 240, role: 'Backend, modèle, longueur, son, ballons' }
+  ];
+  const MODES = [['solo', 'Solo', 'Un seul bot répond.'], ['groupe', 'Groupe', 'Les bots choisis (4 maximum) répondent dans l’ordre de la famille.'], ['aleatoire', 'Aléatoire', 'Le backend tire au hasard les bots qui répondent.'], ['priorite', 'Priorité', 'Le bot le plus compétent répond en premier, les autres ensuite.'], ['synerbot', 'Synerbot', 'Synerbot répond pour tout le monde, en une seule voix.'], ['hybride', 'Hybride', 'Les bots choisis fusionnent en une voix temporaire (Transfusionneur, sans Justicia).']];
+  const MAXSEATS = 4;
+
+  /* ---------------- réglages ---------------- */
+  const DEFS = { url: '', token: '', provider: 'auto', model: '', ideas: true, longueur: true, economie: false, balloons: true, sound: false, tts: false };
+  let CFG = Object.assign({}, DEFS, store.get('blm.cfg', {}));
+  const saveCfg = () => store.set('blm.cfg', CFG);
+  const base = () => (CFG.url || (location.protocol.startsWith('http') ? '' : 'http://127.0.0.1:8787')).replace(/\/$/, '');
+  const headers = () => { const h = { 'content-type': 'application/json' }; if (CFG.token) h['x-blm-token'] = CFG.token; return h; };
+  let STATUS = null;
+
+  /* ---------------- texte : gras et adresses cliquables, jamais de HTML brut ---------------- */
+  function fill(node, text) {
+    node.textContent = '';
+    String(text).split(/(\*\*[^*\n]+\*\*|\b[A-Z]{2,3}[0-9]{1,4}\b)/).forEach(part => {
+      if (!part) return;
+      if (/^\*\*.+\*\*$/.test(part)) node.append(el('strong', { text: part.slice(2, -2) }));
+      else if (/^[A-Z]{2,3}[0-9]{1,4}$/.test(part)) node.append(el('a', { class: 'addr', href: '#/base/' + part, text: part, title: 'Ouvrir ' + part + ' dans la base' }));
+      else node.append(part);
+    });
+  }
+
+  /* ---------------- le chat (solo ou groupe) ---------------- */
+  const chats = {};
+  function buildChat(pg) {
+    const key = 'blm.chat.' + pg.id;
+    const st = Object.assign({ mode: pg.def.mode, seats: pg.def.seats.slice(), count: 3, msgs: [] }, store.get(key, {}));
+    st.msgs = (st.msgs || []).slice(-60);
+    const save = () => store.set(key, { mode: st.mode, seats: st.seats, count: st.count, msgs: st.msgs.slice(-60) });
+    const sec = el('section', { class: 'page', 'data-page': pg.id, 'data-theme': pg.id, 'aria-label': pg.n });
+    const hero = el('div', { class: 'hero' }, el('div', { class: 'ico', text: pg.ico }), el('div', { class: 'grow' }, el('h2', { text: pg.n }), el('p', { text: pg.voice ? '« ' + pg.voice + ' »' : pg.role }), pg.voice ? el('p', { text: pg.role }) : null));
+    sec.append(hero);
+    // réglages du groupe
+    const modesRow = el('div', { class: 'modes', role: 'group', 'aria-label': 'Mode de réponse' });
+    const seatsRow = el('div', { class: 'seats', role: 'group', 'aria-label': 'Bots qui répondent' });
+    const hint = el('p', { class: 'hint' });
+    const countRow = el('div', { class: 'row' }, el('label', { for: 'cnt-' + pg.id, text: 'Nombre de bots tirés au sort : ' }), el('input', { type: 'range', min: 1, max: MAXSEATS, step: 1, id: 'cnt-' + pg.id, value: st.count }), el('b', { text: String(st.count) }));
+    countRow.lastChild.id = 'cntv-' + pg.id;
+    $('input', countRow).addEventListener('input', e => { st.count = +e.target.value; countRow.lastChild.textContent = st.count; save(); });
+    const panel = el('details', { class: 'panel' }, el('summary', { text: 'Qui répond ? (4 bots au plus, plus toi)' }), el('div', { class: 'inner' }, modesRow, seatsRow, countRow, hint));
+    sec.append(panel);
+    function renderControls() {
+      modesRow.textContent = ''; seatsRow.textContent = '';
+      MODES.forEach(([m, n, h]) => modesRow.append(el('button', { 'aria-pressed': st.mode === m, text: n, title: h, onclick: () => { st.mode = m; if (m === 'solo') st.seats = st.seats.slice(0, 1).length ? st.seats.slice(0, 1) : [BOTS[0].id]; save(); renderControls(); } })));
+      const showSeats = !['aleatoire', 'synerbot'].includes(st.mode);
+      seatsRow.style.display = showSeats ? '' : 'none'; countRow.style.display = st.mode === 'aleatoire' ? '' : 'none';
+      BOTS.forEach(b => {
+        const sel = st.seats.includes(b.id), full = st.seats.length >= MAXSEATS && !sel;
+        seatsRow.append(el('button', { class: 'chip', style: '--hc:hsl(' + b.hue + ' 80% 60%)', 'aria-pressed': sel, disabled: full ? true : null, title: b.role, text: b.ico + ' ' + b.n,
+          onclick: () => { if (st.mode === 'solo') { if (sel) return; st.seats = [b.id]; } else if (sel) st.seats = st.seats.filter(x => x !== b.id); else if (!full) st.seats.push(b.id); if (st.mode === 'solo' && st.seats.length > 1) st.mode = 'groupe'; save(); renderControls(); } }));
+      });
+      hint.textContent = (MODES.find(x => x[0] === st.mode) || [])[2] + (st.mode === 'groupe' || st.mode === 'priorite' ? ' Synerbot, s’il est choisi, conclut en dernier.' : '');
+      const names = st.mode === 'aleatoire' ? st.count + ' au hasard' : st.mode === 'synerbot' ? 'Synerbot pour tous' : st.seats.map(id => BY[id].n).join(' · ') || '—';
+      $('summary', panel).textContent = 'Qui répond ? ' + MODES.find(x => x[0] === st.mode)[1] + ' : ' + names;
+    }
+    const log = el('div', { class: 'log', role: 'log', 'aria-live': 'polite' });
+    sec.append(log);
+    const typing = el('div', { class: 'typing', hidden: true });
+    const tools = el('div', { class: 'tools' },
+      el('button', { text: '⏩ Tout afficher', title: 'Fait éclater tous les ballons d’un coup', onclick: () => ENG.AFF.skipAll() }),
+      el('button', { text: '🔇 Voix off', onclick: () => ENG.AUD.stop() }),
+      el('button', { text: '🗑️ Effacer', onclick: () => { if (confirm('Effacer cette conversation de cet appareil ?')) { st.msgs = []; save(); log.textContent = ''; addSys('Conversation effacée.'); } } }));
+    const ta = el('textarea', { rows: 1, placeholder: 'Écris à ' + (pg.id === 'famille' ? 'la famille' : pg.n) + '…', 'aria-label': 'Ton message', maxlength: 4000 });
+    const sendBtn = el('button', { class: 'send', text: 'Envoyer' });
+    sec.append(tools, el('div', { class: 'composer' }, ta, sendBtn));
+    ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, innerHeight * .3) + 'px'; });
+    ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); go(); } });
+    let ctl = null;
+    sendBtn.addEventListener('click', () => ctl ? ctl.abort() : go());
+
+    function scrollEnd() { log.scrollTop = log.scrollHeight; }
+    function addSys(t) { log.append(el('div', { class: 'sys', text: t })); scrollEnd(); }
+    function addMsg(m, live) {
+      const bot = BY[m.id];
+      const wrap = el('div', { class: 'msg ' + (m.role === 'user' ? 'user' : 'bot'), 'data-addr': m.id ? (m.id.toUpperCase().slice(0, 3) + (BOTS.findIndex(b => b.id === m.id) + 1)) : '' });
+      const hue = bot ? bot.hue : (m.hue || 160);
+      wrap.style.setProperty('--hc', 'hsl(' + hue + ' 80% 60%)');
+      wrap.append(el('div', { class: 'who' }, m.role === 'user' ? 'Toi' : (bot ? bot.ico + ' ' : '🧬 ') + m.name, m.provider && m.role !== 'user' ? el('span', { class: 'pv', text: m.provider }) : null));
+      const b = el('div', { class: 'bubble' }); fill(b, m.text); wrap.append(b); typing.remove(); log.append(wrap); scrollEnd();
+      if (live && m.role !== 'user') {
+        if (bot) { ENG.MRK.pulse(bot.id); ENG.AUD.chime(bot); ENG.AUD.speak(m.text, bot); } else ENG.AUD.chime({ f0: 300, pos: [0, 0, 1] });
+        requestAnimationFrame(() => ENG.AFF.reveal(b, hue, { off: !CFG.balloons, onDone: scrollEnd }));
+        if (CFG.balloons && !matchMedia('(prefers-reduced-motion: reduce)').matches) { let n = 0; const iv = setInterval(() => { ENG.AUD.pop(); if (++n > 8 || !ENG.AFF.count()) clearInterval(iv); }, 110); }
+      }
+    }
+    function addIdeas(items, live) {
+      const ol = el('ol'); items.forEach(i => ol.append(el('li', { text: i })));
+      log.append(el('div', { class: 'ideas' }, el('b', { text: '3 idées (propositions, à valider)' }), ol)); scrollEnd();
+    }
+    st.msgs.forEach(m => m.ideas ? addIdeas(m.ideas) : addMsg(m, false));
+    if (!st.msgs.length) addSys(pg.id === 'famille' ? 'Choisis jusqu’à 4 bots et un mode, puis écris.' : 'Tu parles seul·e à ' + pg.n + '. Tu peux inviter d’autres bots avec les pastilles.');
+
+    async function go() {
+      const text = ta.value.trim(); if (!text) return;
+      ta.value = ''; ta.style.height = 'auto';
+      if (!STATUS && !CFG.url && !location.protocol.startsWith('http')) { /* file:// sans backend connu */ }
+      const hist = st.msgs.filter(m => !m.ideas).slice(-24).map(m => ({ role: m.role, name: m.name, text: m.text }));
+      const um = { role: 'user', name: 'Toi', text }; st.msgs.push(um); addMsg(um, false); save();
+      ctl = new AbortController(); sendBtn.textContent = 'Stop'; ENG.AUD.enable(CFG.sound); ENG.AUD.enableTTS(CFG.tts);
+      const body = { message: text, mode: st.mode, seats: st.seats, history: hist, options: { provider: CFG.provider, model: CFG.model, ideas: CFG.ideas, longueur: CFG.longueur, economie: CFG.economie, count: st.count } };
+      let order = [];
+      const showTyping = i => { const id = order[i]; const nm = id === 'hybride' ? 'Une voix hybride' : (BY[id] || {}).n; if (nm) { typing.hidden = false; typing.textContent = nm + ' écrit'; log.append(typing); scrollEnd(); } };
+      let got = 0;
+      try {
+        const r = await fetch(base() + '/api/chat', { method: 'POST', headers: headers(), body: JSON.stringify(body), signal: ctl.signal });
+        if (!r.ok || !r.body) { const j = await r.json().catch(() => ({})); throw new Error(j.error || ('HTTP ' + r.status)); }
+        const rd = r.body.getReader(), dec = new TextDecoder(); let buf = '';
+        const handle = ev => {
+          if (ev.type === 'start') { order = ev.order || []; showTyping(0); if (ev.budget) $('#prov').dataset.last = ev.provider + ' · ' + ev.budget.cat + ' ' + ev.budget.lo + '–' + ev.budget.hi + ' mots/bot'; refreshProv(); }
+          else if (ev.type === 'bot') { const m = { role: 'bot', id: ev.id, name: ev.name, text: ev.text, provider: ev.provider, hue: ev.id === 'hybride' ? 160 : undefined }; st.msgs.push(m); addMsg(m, true); got++; save(); if (got < order.length) showTyping(got); }
+          else if (ev.type === 'ideas') { st.msgs.push({ ideas: ev.items }); addIdeas(ev.items, true); save(); }
+          else if (ev.type === 'warn') addSys('⚠️ ' + ev.message);
+          else if (ev.type === 'error') addSys('⛔ ' + ev.message);
+        };
+        for (; ;) { const { done, value } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf('\n')) >= 0) { const ln = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (ln) { try { handle(JSON.parse(ln)); } catch (e) { } } } }
+      } catch (e) {
+        if (e.name === 'AbortError') addSys('Arrêté.'); else { addSys('⛔ Backend non joint (' + e.message + '). Lance « node backend.js » et vérifie l’adresse dans Réglages.'); markOffline(); }
+      } finally { typing.remove(); ctl = null; sendBtn.textContent = 'Envoyer'; scrollEnd(); }
+    }
+    renderControls();
+    chats[pg.id] = { st, log };
+    return sec;
+  }
+
+  /* ---------------- atelier : High Stream, merkaba, état des moteurs ---------------- */
+  function buildAtelier(pg) {
+    const sec = el('section', { class: 'page', 'data-page': pg.id, 'data-theme': 'atelier', 'aria-label': pg.n });
+    sec.append(el('div', { class: 'hero' }, el('div', { class: 'ico', text: pg.ico }), el('div', { class: 'grow' }, el('h2', { text: 'Atelier High Stream' }), el('p', { text: 'Filtre d’image en 4 étapes : ① ombre/lumière → ② netteté → ③ couleur → ④ reflet' }))));
+    const sc = el('div', { class: 'scroll' }); sec.append(sc);
+    const cv = el('canvas', { id: 'hs', width: 960, height: 540, 'aria-label': 'Image filtrée par High Stream' });
+    const led = (id, t) => el('span', null, el('i', { class: 'led', id }), t);
+    const gauge = el('div', { class: 'gauge' }, el('i')); const stages = el('div', { class: 'stages' }, ...['① ombre/lumière', '② netteté', '③ couleur', '④ reflet', '💥 burst'].map(t => el('span', { text: t })));
+    const mkSlider = (k, label, def, max) => { const v = el('b', { text: def.toFixed(2) }); const i = el('input', { type: 'range', min: 0, max: max || 1, step: .01, value: def, 'aria-label': label }); i.addEventListener('input', () => { MAX[k] = +i.value; v.textContent = MAX[k].toFixed(2); if (!cycle) ENG.HS.set(k, MAX[k]); }); return el('label', { class: 'f' }, el('span', null, label + ' : ', v), i); };
+    const MAX = { s1: .8, s2: .7, s3: .7, s4: .6, split: 0, horizon: .62 };
+    let cycle = null;
+    const startBtn = el('button', { text: '▶ Lancer le cycle (1 clic)', onclick: toggleCycle });
+    const file = el('input', { type: 'file', accept: 'image/*', class: 'sr', id: 'hsfile' });
+    file.addEventListener('change', async () => { const f = file.files[0]; if (!f) return; try { const bmp = await createImageBitmap(f); ENG.HS.setSource(bmp); } catch (e) { alert('Image illisible : ' + e.message); } });
+    const emoji = el('input', { type: 'text', value: '🙂', maxlength: 4, 'aria-label': 'Émoji de la tête du bonhomme', style: 'width:4.5em;text-align:center' });
+    emoji.addEventListener('change', () => ENG.HS.setSource(ENG.demoScene(emoji.value)));
+    const splitI = el('input', { type: 'range', min: 0, max: 1, step: .01, value: 0, 'aria-label': 'Curseur avant / après' }); splitI.addEventListener('input', () => ENG.HS.set('split', +splitI.value));
+    const stat = el('div', { class: 'card hint', id: 'hsstat' });
+    sc.append(cv, el('label', { class: 'f' }, el('span', { text: 'Avant (gauche) / après (droite)' }), splitI),
+      el('div', { class: 'row' }, startBtn, el('button', { text: '🖼️ Scène démo', onclick: () => ENG.HS.setSource(ENG.demoScene(emoji.value)) }), el('label', { class: 'inl' }, 'Tête :', emoji), el('button', { text: '📂 Ouvrir une image', onclick: () => file.click() }), file),
+      gauge, stages,
+      el('div', { class: 'card' }, mkSlider('s1', '① Ombre / lumière', MAX.s1), mkSlider('s2', '② Netteté (contours seulement)', MAX.s2), mkSlider('s3', '③ Couleur et pouls de teinte', MAX.s3), mkSlider('s4', '④ Reflet (miroir + dispersion)', MAX.s4), mkSlider('horizon', 'Ligne d’horizon du reflet', MAX.horizon)),
+      el('div', { class: 'card hint' }, led('l-render', 'rendu : '), el('span', { id: 'm-render', text: '…' }), ' · ', led('l-audio', 'son'), ' · ', led('l-tts', 'voix du navigateur')),
+      stat,
+      el('h3', { text: 'Merkaba de la famille' }),
+      el('canvas', { id: 'mk', 'aria-label': 'Merkaba : double tétraèdre, un point par bot' }),
+      el('p', { class: 'hint', text: 'Superbot au pôle haut, Synerbot au pôle bas (son miroir), les 7 autres sur 7 sommets, toi au centre. Placement provisoire (Claude), à confirmer par toi. Un point s’allume quand le bot parle. Ici une seule merkaba est dessinée, pas les 5 emboîtées.' }),
+      el('div', { class: 'card hint', text: 'Honnêteté : ce filtre est un shader de démonstration (4 étapes) dans une page web, pas les 3 158 réglages de High Stream. Les images ne quittent pas ton appareil. Le « presse-papier de pixels » compte les images recopiées au lieu d’être recalculées.' }));
+    function toggleCycle() {
+      if (cycle) { cancelAnimationFrame(cycle.raf); cycle = null; startBtn.textContent = '▶ Lancer le cycle (1 clic)'; Object.keys(MAX).forEach(k => ENG.HS.set(k, MAX[k])); ENG.HS.set('split', +splitI.value); gauge.firstChild.style.width = '0'; stages.childNodes.forEach(n => n.classList.remove('on')); return; }
+      const t0 = performance.now(); startBtn.textContent = '■ Arrêter';
+      const tick = () => {
+        const t = (performance.now() - t0) / 1000, g = Math.min(1, t / 3.2), q = i => Math.max(0, Math.min(1, g * 4 - i));
+        const burst = g >= 1 ? .88 + .12 * Math.sin((t - 3.2) * 3.9) : 1;     // burst automatique en boucle, sans clic répété
+        ENG.HS.set('s1', MAX.s1 * q(0) * burst); ENG.HS.set('s2', MAX.s2 * q(1) * burst); ENG.HS.set('s3', MAX.s3 * q(2) * burst); ENG.HS.set('s4', MAX.s4 * q(3) * burst);
+        gauge.firstChild.style.width = (g * 100) + '%'; stages.childNodes.forEach((n, i) => n.classList.toggle('on', i < 4 ? g * 4 > i : g >= 1));
+        cycle.raf = requestAnimationFrame(tick);
+      };
+      cycle = { raf: 0 }; tick();
+    }
+    sec._init = () => {
+      if (sec._done) return; sec._done = true;
+      const m = ENG.HS.init(cv); $('#m-render').textContent = m; $('#l-render').classList.add(m === 'aucun' ? 'ko' : 'ok');
+      ENG.HS.setSource(ENG.demoScene('🙂')); Object.keys(MAX).forEach(k => ENG.HS.set(k, MAX[k]));
+      $('#l-audio').classList.add(ENG.AUD.supported() ? 'ok' : 'ko'); $('#l-tts').classList.add(ENG.AUD.ttsSupported() ? 'ok' : 'ko');
+      ENG.MRK.init($('#mk'), BOTS);
+      setInterval(() => { const f = ENG.HS.frames; $('#hsstat').textContent = 'Images calculées : ' + f.computed + ' · recopiées sans calcul : ' + f.copied; }, 1000);
+    };
+    return sec;
+  }
+
+  /* ---------------- base BLM ---------------- */
+  function buildBase(pg) {
+    const sec = el('section', { class: 'page', 'data-page': pg.id, 'data-theme': 'base', 'aria-label': pg.n });
+    sec.append(el('div', { class: 'hero' }, el('div', { class: 'ico', text: pg.ico }), el('div', { class: 'grow' }, el('h2', { text: 'Base BLM' }), el('p', { id: 'basestat', text: 'Adresse (HS0, KIF5, VEI2…) ou mot (accompagner, merkaba…)' }))));
+    const q = el('input', { type: 'search', placeholder: 'HS0, VEI2, équilibre…', 'aria-label': 'Adresse ou mot', style: 'flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);min-height:44px' });
+    const res = el('div', { class: 'res' }), out = el('pre', { class: 'coff', hidden: true });
+    const sc = el('div', { class: 'scroll' }, el('div', { class: 'row' }, q, el('button', { text: 'Chercher', onclick: () => lookup(q.value) })), res, out); sec.append(sc);
+    q.addEventListener('keydown', e => { if (e.key === 'Enter') lookup(q.value); });
+    async function lookup(v) {
+      v = v.trim(); if (!v) return; res.textContent = ''; out.hidden = true;
+      try {
+        if (/^[A-Za-z]{1,3}[0-9]{1,10}$/.test(v)) {
+          const r = await fetch(base() + '/api/blm?id=' + encodeURIComponent(v.toUpperCase()), { headers: headers() }); const j = await r.json();
+          if (j.text) { fill(out, j.text.replace(/\n {2}/g, '\n')); out.hidden = false; location.hash.startsWith('#/base') && history.replaceState(null, '', '#/base/' + v.toUpperCase()); } else res.append(el('p', { class: 'hint', text: j.error || 'adresse inconnue' }));
+        } else {
+          const r = await fetch(base() + '/api/blm?q=' + encodeURIComponent(v), { headers: headers() }); const j = await r.json();
+          (j.mots || []).forEach(m => res.append(el('button', { text: '📖 ' + m.mot.replace(/_/g, ' ') + ' (' + m.id + ') : ' + (m.sens || ''), onclick: () => { q.value = m.id; lookup(m.id); } })));
+          (j.resultats || []).forEach(m => res.append(el('button', { text: m.id + ' : ' + m.titre.replace(/\p{Extended_Pictographic}️?/gu, ''), onclick: () => { q.value = m.id; lookup(m.id); } })));
+          if (!res.childNodes.length) res.append(el('p', { class: 'hint', text: 'Rien trouvé.' }));
+        }
+      } catch (e) { res.append(el('p', { class: 'hint', text: 'Backend non joint : ' + e.message })); markOffline(); }
+    }
+    sec._open = arg => { if (arg) { q.value = arg; lookup(arg); } };
+    return sec;
+  }
+
+  /* ---------------- réglages ---------------- */
+  function buildSettings(pg) {
+    const sec = el('section', { class: 'page', 'data-page': pg.id, 'data-theme': 'reglages', 'aria-label': pg.n });
+    sec.append(el('div', { class: 'hero' }, el('div', { class: 'ico', text: pg.ico }), el('div', { class: 'grow' }, el('h2', { text: 'Réglages' }), el('p', { text: 'Enregistrés sur cet appareil seulement. Les clés d’API restent dans le backend.' }))));
+    const f = (k, label, type, opts) => { let i; if (type === 'select') { i = el('select', null, ...opts.map(([v, t]) => el('option', { value: v, text: t }))); i.value = CFG[k]; i.addEventListener('change', () => { CFG[k] = i.value; saveCfg(); refreshProv(); }); } else if (type === 'check') { i = el('input', { type: 'checkbox' }); i.checked = !!CFG[k]; i.addEventListener('change', () => { CFG[k] = i.checked; saveCfg(); if (k === 'sound') ENG.AUD.enable(CFG.sound); if (k === 'tts') ENG.AUD.enableTTS(CFG.tts); }); return el('label', { class: 'inl' }, i, label); } else { i = el('input', { type, value: CFG[k] || '', autocomplete: 'off', spellcheck: false }); i.addEventListener('change', () => { CFG[k] = i.value.trim(); saveCfg(); loadStatus(); }); } return el('label', { class: 'f' }, el('span', { text: label }), i); };
+    sec.append(el('div', { class: 'scroll' },
+      el('h3', { text: 'Backend' }), f('url', 'Adresse du backend (vide = celui qui sert cette page)', 'text'), f('token', 'Jeton (seulement si le backend exige BLM_TOKEN)', 'password'),
+      el('h3', { text: 'Modèle' }), f('provider', 'Fournisseur', 'select', [['auto', 'Automatique (Ollama, puis Claude, puis Gemini, sinon BLM seul)'], ['ollama', 'Ollama (Llama, sur ton appareil)'], ['anthropic', 'Claude (clé dans le backend)'], ['gemini', 'Gemini (clé dans le backend)'], ['local', 'BLM seul, sans LLM']]), f('model', 'Nom du modèle (vide = celui du backend)', 'text'),
+      el('div', { class: 'card hint', id: 'provinfo', text: '…' }),
+      el('h3', { text: 'Réponses' }), f('ideas', 'Ajouter 3 idées différentes (propositions)', 'check'), f('longueur', 'Règle de longueur DEN : pas trop, pas trop peu', 'check'), f('economie', 'Économie de batterie : bas de la plage de longueur', 'check'),
+      el('h3', { text: 'Affichage et son' }), f('balloons', 'Ballons de peinture (affichage AFF)', 'check'), f('sound', 'Sons : carillon par bot, éclatements, placement binaural', 'check'), f('tts', 'Lire les réponses à voix haute (voix du navigateur, hauteur propre à chaque bot)', 'check'),
+      el('h3', { text: 'Données' }), el('button', { text: 'Effacer toutes les conversations de cet appareil', onclick: () => { if (confirm('Tout effacer ?')) { Object.keys(chats).forEach(id => store.del('blm.chat.' + id)); location.reload(); } } })));
+    return sec;
+  }
+
+  /* ---------------- état du backend ---------------- */
+  function markOffline() { $('#banner').classList.add('on'); $('#dot').className = 'bad'; STATUS = null; refreshProv(); }
+  function refreshProv() {
+    const p = $('#prov'); let t, info;
+    if (!STATUS) { t = 'backend non joint'; info = 'Le backend ne répond pas. Lance « node backend.js » puis recharge la page.'; }
+    else {
+      const a = STATUS.providers, want = CFG.provider, real = want !== 'auto' ? (a[want] ? want : 'local') : (a.ollama ? 'ollama' : a.anthropic ? 'anthropic' : a.gemini ? 'gemini' : 'local');
+      t = real === 'local' ? 'BLM seul (sans LLM)' : 'LLM : ' + real + ' · ' + (CFG.model || STATUS.models[real]);
+      info = 'Disponibles : Ollama ' + (a.ollama ? '✔' : '✖') + ' · Claude ' + (a.anthropic ? '✔' : '✖') + ' · Gemini ' + (a.gemini ? '✔' : '✖') + '. Base : ' + STATUS.baseChars.toLocaleString('fr-FR') + ' caractères, ' + STATUS.extraits + ' extraits, ' + STATUS.lexique + ' mots du lexique. Version ' + STATUS.version + '.' + (want !== 'auto' && !a[want] && want !== 'local' ? ' Le fournisseur choisi n’est pas disponible : repli sur « BLM seul ».' : '');
+      $('#dot').className = real === 'local' ? 'ok' : 'llm';
+    }
+    p.textContent = t; if (p.dataset.last) p.title = p.dataset.last; const pi = $('#provinfo'); if (pi) pi.textContent = info;
+    const bs = $('#basestat'); if (bs && STATUS) bs.textContent = STATUS.extraits + ' extraits · ' + STATUS.lexique + ' mots · adresse (HS0, KIF5…) ou mot';
+  }
+  async function loadStatus() {
+    try { const r = await fetch(base() + '/api/status', { headers: headers() }); if (!r.ok) throw new Error(r.status === 401 ? 'jeton refusé' : 'HTTP ' + r.status); STATUS = await r.json(); $('#banner').classList.remove('on'); }
+    catch (e) { STATUS = null; $('#banner').textContent = 'Backend non joint (' + e.message + '). Lance « node backend.js » dans le dossier, puis recharge. Adresse utilisée : ' + (base() || location.origin) + '.'; $('#banner').classList.add('on'); }
+    refreshProv();
+  }
+
+  /* ---------------- routeur SPA ---------------- */
+  const pages = {};
+  function boot() {
+    document.title = 'BLM · SuperBots ' + 'V1.0A.18';
+    const tabs = $('#tabs'), host = $('#pages');
+    PAGES.forEach(pg => {
+      const sec = pg.chat ? buildChat(pg) : pg.id === 'atelier' ? buildAtelier(pg) : pg.id === 'base' ? buildBase(pg) : buildSettings(pg);
+      host.append(sec); pages[pg.id] = sec;
+      tabs.append(el('a', { href: '#/' + pg.id, 'data-id': pg.id, style: '--tc:hsl(' + pg.hue + ' 80% 60%)' }, el('span', { text: pg.ico }), pg.n));
+    });
+    addEventListener('hashchange', route); route(); loadStatus(); setInterval(loadStatus, 30000);
+    ENG.AUD.enable(CFG.sound); ENG.AUD.enableTTS(CFG.tts);
+    if ('serviceWorker' in navigator) { /* pas de service worker : un seul fichier, pas de fichier annexe */ }
+  }
+  function route() {
+    const [, id0, arg] = (location.hash || '#/famille').split('/'); const id = pages[id0] ? id0 : 'famille';
+    Object.entries(pages).forEach(([k, s]) => s.classList.toggle('on', k === id));
+    document.querySelectorAll('#tabs a').forEach(a => { if (a.dataset.id === id) { a.setAttribute('aria-current', 'page'); a.scrollIntoView({ inline: 'center', block: 'nearest' }); } else a.removeAttribute('aria-current'); });
+    const th = pages[id].dataset.theme; document.body.dataset.theme = th;
+    const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = getComputedStyle(pages[id]).getPropertyValue('--bg').trim() || '#0b0d16';
+    if (pages[id]._init) pages[id]._init(); if (pages[id]._open) pages[id]._open(arg);
+    if (chats[id]) chats[id].log.scrollTop = chats[id].log.scrollHeight;
+  }
+  boot();
+})();
+
+</script>
+</body>
+</html>
