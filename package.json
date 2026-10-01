@@ -1,9 +1,0 @@
-{
-  "name": "superbots-blm",
-  "version": "0.2.0",
-  "description": "Backend BLM de la famille SuperBots (Samuelhaï), posé sur Llama via Ollama",
-  "type": "module",
-  "private": true,
-  "engines": { "node": ">=18" },
-  "scripts": { "start": "node server.js" }
-}
